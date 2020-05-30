@@ -1,37 +1,37 @@
 const fready_api = "http://localhost:3000"
 let tab_cache = {} // tab_id & data
 let active_tab = null
+
 class Fready {
   constructor(url, tab){
     this.url = url
     this.tab = tab
     this.fetched = false
+    this.fetch()
   }
-  set url(n){
-    this.url_val = n
-    this.update()
-  }
-  get url(){
-    return this.url_val
-  }
+  
   get active(){
     return this.tab == active_tab
   }
-  update(){
+  update(url){
+    this.url = url
     this.fetch()
   }
   activate(){
     active_tab = this.tab
-    this.render_badge('..')
+    this.render_badge('.')
     if (this.fetched) {
-      console.log(`should change text to ${this.data['eta']}`)
-      this.render_badge(`${this.data['eta']} mins`)
+      if (this.data['eta'] > 0){
+        this.render_badge(`${this.data['eta']} mins`)
+      }
+      else{
+        this.render_badge('')
+      }
     }
   }
   fetch(){
     // chrome.browserAction.setBadgeText({ text: '...' })
     this.render_badge('...')
-    console.log('fetching')
     this.fetched = false
     $.ajax({
       url: `${fready_api}/article_prev?loc=${this.url}`,
@@ -51,6 +51,8 @@ class Fready {
       error: (data) => { 
         this.fetched = true
         console.log("failed to fetch url")
+        this.render_badge('')
+        this.data = {'eta': 0}
         // this.activate()
       }
     })
@@ -70,18 +72,14 @@ function new_view(tab_id, url){
   if (tab_id in tab_cache){
     let fready = tab_cache[tab_id]
     if (url == fready.url){
-      console.log('fready exists, displaying')
-      fready.activate()
+      console.log('fready exists')
     }else{
-      console.log('fready exists, but was outdated, reloading and displaying')
-      fready.update()
-      fready.activate()
-
+      console.log('fready exists, but was outdated, reloading')
+      fready.update(url)
     }
   }else{
-    console.log('fready didnt exist, loading and displaying')
+    console.log('fready didnt exist, creating new, fetching')
     tab_cache[tab_id] = new Fready(url, tab_id)
-    tab_cache[tab_id].activate()
   }
 }
 function remove_view(tab_id){
@@ -107,16 +105,19 @@ chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
   }
 })
 
-chrome.tabs.onActiveChanged.addListener( (tabId, changeInfo, tab) => {
+chrome.tabs.onActivated.addListener( (info) => {
   // read changeInfo data and do something with it (like read the url)
   // console.log(tabId)
   // console.log(tabId in tab_cache ? tab_cache[tabId] : "nilllllllll")
+  let tabId = info['tabId']
+  console.log(tabId)
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
     let url = tabs[0].url
     // console.log(url)
     // user switched his view
     // tab_cache[tabId] = new Fready(url, tabId)
     new_view(tabId, url)
+    tab_cache[tabId].activate()
   })
 })
 
