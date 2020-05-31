@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600&family=Reem+Kufi&family=Roboto:wght@500&display=swap');
+
+#fready_ui{
+  transition: all .5 ease;
+  all: initial;
+  /* display: none; */
+  font-family: 'Open Sans', sans-serif;
+  /* background: #2B6CCE;  */
+/* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */ 
+  border-radius: 10px 0px 7px 13px;
+  width: 250px; 
+  height:50px; 
+  position:fixed; 
+  top:0; 
+  right:0; 
+  padding:10px; 
+  z-index:96969696969; 
+  backdrop-filter: blur(10px);
+  margin: 20px;
+  margin-top: 0;
+  background: rgba(247, 247, 247, 0.829);
+  box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
+}
+
+.fready_button{
+  transition: all .5 ease;
+  all: initial;
+  font-family: Roboto;
+  letter-spacing: 1.4px;
+  background-color: #2B6CCE;
+  border: 2px solid rgb(20, 51, 97);
+  border-radius: 4px;
+  box-shadow: -0px 0px 8px rgba(0, 0, 0, 0.15);
+  padding: 5px 10px;
+  color: whitesmoke;
+  cursor: pointer;
+}
+
+.fready_button:hover{
+  background-color: rgb(38, 92, 173);
+  border: 2px solid rgb(38, 93, 182);
+  box-shadow: -0px 0px 15px rgba(0, 0, 0, 0.30);
+  color: white;
+}
+
+
+.inline{
+  display: inline-block;
+}

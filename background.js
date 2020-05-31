@@ -109,6 +109,8 @@ function remove_view(tab_id){
 chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
   // read changeInfo data and do something with it (like read the url)
   // console.log(changeInfo)
+  console.log(changeInfo)
+  tab_cache[tabId].activate()
   if (changeInfo.url) {
     // console.log('changed url')
     console.table("URL", changeInfo.url, check_url(changeInfo.url))

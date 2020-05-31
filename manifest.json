@@ -25,20 +25,24 @@
         ],
         "js": [
           "third_party/jquery.min.js",
+          "assets/icons.js",
           "injector.js"
+        ],
+        "css": [
+          "injector.css"
         ]
       }
     ],
     "browser_action": {
-      "default_popup": "popup.html",
+      // "default_popup": "popup.html",
       "default_icon": {
-        "16": "assets/fready_logo_16.png",
-        "32": "assets/fready_logo_32.png",
-        "48": "assets/fready_logo_48.png",
-        "64": "assets/fready_logo_64.png",
-        "128": "assets/fready_logo_128.png",
-        "256": "assets/fready_logo_256.png",
-        "512": "assets/fready_logo_512.png"
+        "16": "assets/logos/fready_logo_16.png",
+        "32": "assets/logos/fready_logo_32.png",
+        "48": "assets/logos/fready_logo_48.png",
+        "64": "assets/logos/fready_logo_64.png",
+        "128": "assets/logos/fready_logo_128.png",
+        "256": "assets/logos/fready_logo_256.png",
+        "512": "assets/logos/fready_logo_512.png"
       }
     },
     "commands": {
@@ -51,13 +55,13 @@
       }
     },
     "icons": {
-      "16": "assets/fready_logo_16.png",
-      "32": "assets/fready_logo_32.png",
-      "48": "assets/fready_logo_48.png",
-      "64": "assets/fready_logo_64.png",
-      "128": "assets/fready_logo_128.png",
-      "256": "assets/fready_logo_256.png",
-      "512": "assets/fready_logo_512.png"
+      "16": "assets/logos/fready_logo_16.png",
+      "32": "assets/logos/fready_logo_32.png",
+      "48": "assets/logos/fready_logo_48.png",
+      "64": "assets/logos/fready_logo_64.png",
+      "128": "assets/logos/fready_logo_128.png",
+      "256": "assets/logos/fready_logo_256.png",
+      "512": "assets/logos/fready_logo_512.png"
     },
     "manifest_version": 2
   }
