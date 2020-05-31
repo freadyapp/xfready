@@ -18,8 +18,19 @@
       ],
       "persistent": false
     },
+    "content_scripts": [
+      {
+        "matches": [
+          "<all_urls>"
+        ],
+        "js": [
+          "third_party/jquery.min.js",
+          "injector.js"
+        ]
+      }
+    ],
     "browser_action": {
-      // "default_popup": "popup.html",
+      "default_popup": "popup.html",
       "default_icon": {
         "16": "assets/fready_logo_16.png",
         "32": "assets/fready_logo_32.png",

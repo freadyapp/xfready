@@ -39,7 +39,7 @@ class Fready {
   }
   fetch(){
     // chrome.browserAction.setBadgeText({ text: '...' })
-    this.render_badge('...')
+    // this.render_badge('...')
     this.fetched = false
     $.ajax({
       url: `${fready_api}/article_prev?loc=${this.url}`,
@@ -58,7 +58,7 @@ class Fready {
       },
       error: (data) => { 
         this.fetched = true
-        console.log("failed to fetch url")
+        // console.log("failed to fetch url")
         this.render_badge('')
         this.data = {'eta': 0}
         // this.activate()
@@ -70,7 +70,13 @@ class Fready {
   }
   render_badge(txt){
     if (this.active){
-      chrome.browserAction.setBadgeText({ text: txt })
+      if (txt==''){
+        chrome.browserAction.setBadgeText({ text: "", tabId: this.tab})
+        chrome.browserAction.disable(this.tab)
+      }else{
+        chrome.browserAction.enable(this.tab)
+        chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab})
+      }
     }
   }
 }
@@ -120,7 +126,7 @@ chrome.tabs.onActivated.addListener( (info) => {
   // console.log(tabId)
   // console.log(tabId in tab_cache ? tab_cache[tabId] : "nilllllllll")
   let tabId = info['tabId']
-  console.log(tabId)
+  // console.log(tabId)
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
     let url = tabs[0].url
     // console.log(url)
@@ -137,6 +143,22 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   // console.log(tabId in tab_cache ? tab_cache[tabId] : "nilllllllll")
   remove_view(tabId)
 })
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+    console.log(sender.tab.id)
+    console.log(tab_cache[sender.tab.id])
+    if (request.request == "frd")
+      sendResponse({ frd: tab_cache[sender.tab.id]});
+  });
+
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   if (request.type == "worktimer-notification")
+//     chrome.notifications.create('worktimer-notification', request.options, function () { });
+
+//   sendResponse();
+// });
+
 
 // chrome.browserAction.onClicked.addListener(tab => {
 //   chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
