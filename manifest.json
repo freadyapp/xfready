@@ -13,6 +13,7 @@
     "background": {
       "scripts": [
         "third_party/jquery.min.js",
+        "helpers.js",
         "background.js"
       ],
       "persistent": false

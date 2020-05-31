@@ -7,22 +7,30 @@ class Fready {
     this.url = url
     this.tab = tab
     this.fetched = false
-    this.fetch()
+    this.load()
   }
-  
+  load(){
+    if (check_url(this.url)){
+      this.fetch()
+    }else{
+      this.fetched = true
+      this.data = { 'eta': 0 }
+      if (this.active) { this.activate() }
+    }
+  }
   get active(){
     return this.tab == active_tab
   }
   update(url){
     this.url = url
-    this.fetch()
+    this.load()
   }
   activate(){
     active_tab = this.tab
     this.render_badge('.')
     if (this.fetched) {
       if (this.data['eta'] > 0){
-        this.render_badge(`${this.data['eta']} mins`)
+        this.render_badge(`${this.data['eta']}'`)
       }
       else{
         this.render_badge('')
@@ -69,6 +77,7 @@ class Fready {
 
 function new_view(tab_id, url){
   // console.log(tabId in tab_cache ? tab_cache[tabId] : "nilllllllll")
+  console.table("URL", url, check_url(url))
   if (tab_id in tab_cache){
     let fready = tab_cache[tab_id]
     if (url == fready.url){
@@ -82,6 +91,7 @@ function new_view(tab_id, url){
     tab_cache[tab_id] = new Fready(url, tab_id)
   }
 }
+
 function remove_view(tab_id){
   // console.log(tabId in tab_cache ? tab_cache[tabId] : "nilllllllll")
   if (tab_id in tab_cache){
@@ -95,7 +105,7 @@ chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
   // console.log(changeInfo)
   if (changeInfo.url) {
     // console.log('changed url')
-    console.log(tabId)
+    console.table("URL", changeInfo.url, check_url(changeInfo.url))
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
       let url = tabs[0].url
       // console.log(url)
