@@ -257,24 +257,28 @@ chrome.runtime.onMessage.addListener(
 // });
 
 
-// chrome.browserAction.onClicked.addListener(tab => {
-//   chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-//     let url = tabs[0].url
-//     console.log(url)
-//     console.log(`${fready_api}/article_prev?loc=${url}`)
-//     chrome.browserAction.setBadgeText({ text: '...' })
-//     $.ajax({
-//       url: `${fready_api}/article_prev?loc=${url}`,
-//       type: 'GET',
-//       crossDomain: true,
-//       success: (data) => {
-//         console.log(data)
-//         chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
-//        },
-//       error: (data) => { console.log("failed to fetch url") }
-//     })
-//   })
-// })
+chrome.browserAction.onClicked.addListener(tab => {
+  // chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+  //   let url = tabs[0].url
+  //   console.log(url)
+  //   console.log(`${fready_api}/article_prev?loc=${url}`)
+  //   chrome.browserAction.setBadgeText({ text: '...' })
+  //   $.ajax({
+  //     url: `${fready_api}/article_prev?loc=${url}`,
+  //     type: 'GET',
+  //     crossDomain: true,
+  //     success: (data) => {
+  //       console.log(data)
+  //       chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
+  //      },
+  //     error: (data) => { console.log("failed to fetch url") }
+  //   })
+  // })
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, function (response) {
+    });
+  });
+})
 
 sync_api()
 sync_user()

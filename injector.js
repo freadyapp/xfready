@@ -1,7 +1,8 @@
 let frd = null
 let frame = null
-let show = false
+let read = false
 let saved = false
+let show = false
 
 let name = ""
 
@@ -25,12 +26,11 @@ function perform_user_data_setup(){
 
 // front
 
-function showhide(){
-  show = !show
-  if (show){
+function readexit(){
+  read = !read
+  if (read){
     $("#readthisfready").addClass("exit")
     $("#readthisfready").text(`EXIT`)
-    console.log('showing')
     $(document.body).prepend(frame)
     $(frame).fadeTo(0, 0.01)
     $(frame).fadeTo(200, 1)
@@ -38,9 +38,7 @@ function showhide(){
 
     $("#readthisfready").removeClass("exit")
     $("#readthisfready").text(`READ`)
-    console.log('hidin')
     $(frame).fadeTo(200, 0.01, () => { $(frame).remove()})
-    
   }
 }
 
@@ -57,19 +55,44 @@ function saveunsave(){
   }
 }
 
+function showhide(){
+  show = !show
+  if (show){
+    $('#fready_ui')
+      .css({'filter': 'saturate(1)'})
+      .slideDown(70)
+      .fadeTo(10, 1)
+  }else{
+    $("#fready_ui")
+      .css({ 'filter': 'saturate(0)' })
+      .fadeTo(200, 0.5)
+      .slideUp(100)
+  }
+}
+
 
 // when loaded run this
 
 $(document.body).prepend(ui)
+$("#fready_ui")
+  .fadeTo(0, 0.5)
+  .css({ 'filter': 'saturate(0)' })
+  .slideUp(0)
+// showhide()
 perform_user_data_setup()
 
 $("#readthisfready").click(() => {
-  showhide()
+  readexit()
 })
 
 $("#savethisfready").click( () => {
   saveunsave()
 })
+
+$(".freadyhide").click( () => {
+  showhide()
+})
+
 
 chrome.runtime.sendMessage({ request: "frd" }, function (response) {
   console.log(response.frd)
@@ -80,3 +103,10 @@ chrome.runtime.sendMessage({ request: "frd" }, function (response) {
     saveunsave()
   }
 })
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+    if (request.trigger == "click"){
+      showhide()
+    }
+  })
