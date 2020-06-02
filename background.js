@@ -2,6 +2,7 @@ const fready_api = "http://localhost:3000"
 let tab_cache = {} // tab_id & data
 let active_tab = null
 let api_key = get_api()
+// let username = get_user()
 
 function get_api(){
   chrome.storage.sync.get(['freadyskey'], (result) => {
@@ -21,7 +22,20 @@ function sync_api(){
     },
     error: (data) => { console.log('failed to sync api key') }
   })
-  
+}
+function sync_user(){
+  $.ajax({
+    url: `${fready_api}/xapi/user`,
+    type: 'GET',
+    crossDomain: true,
+    success: (data) => {
+      chrome.storage.sync.set({ freadysusername: data['name'] }, function () {
+        username = data['name']
+      })
+      // chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
+    },
+    error: (data) => { console.log('failed to sync api key') }
+  })
 }
 
 class Fready {
@@ -228,6 +242,9 @@ chrome.runtime.onMessage.addListener(
     if (request.request == "unsave")
       tab_cache[sender.tab.id].unsave()
       sendResponse({ 'status': "complete "});
+    if (request.request == "user")
+      tab_cache[sender.tab.id].unsave()
+      sendResponse({ 'status': "complete "});
   });
 
 
@@ -260,3 +277,4 @@ chrome.runtime.onMessage.addListener(
 // })
 
 sync_api()
+sync_user()

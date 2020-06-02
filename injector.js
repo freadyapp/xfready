@@ -3,6 +3,7 @@ let frame = null
 let show = false
 let saved = false
 
+let name = ""
 
 // talking with backend
 function perform_save() {
@@ -13,6 +14,12 @@ function perform_save() {
 function perform_unsave() {
   chrome.runtime.sendMessage({ request: "unsave" }, (response) => {
     console.log(response)
+  })
+}
+function perform_user_data_setup(){
+  chrome.storage.sync.get(['freadysusername'], (result) => {
+    name = result.freadysusername || ""
+    $("#username").text(name)
   })
 }
 
@@ -54,6 +61,7 @@ function saveunsave(){
 // when loaded run this
 
 $(document.body).prepend(ui)
+perform_user_data_setup()
 
 $("#readthisfready").click(() => {
   showhide()

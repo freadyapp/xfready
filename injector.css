@@ -8,8 +8,8 @@
   /* background: #2B6CCE;  */
 /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */ 
   border-radius: 10px 0px 7px 13px;
-  width: 250px; 
-  height:50px; 
+  width: 170px; 
+  height:40px; 
   position:fixed; 
   top:0; 
   right:0; 
@@ -20,6 +20,7 @@
   margin-top: 0;
   background: rgba(247, 247, 247, 0.829);
   box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
+  text-align: center;
 }
 
 .fready_button{
@@ -64,4 +65,10 @@
   background-color: transparent;
   color: #2B6CCE;
   border: 2px solid transparent;
+}
+
+.meta{
+  font-size: 8px;
+  font-family: 'Open Sans';
+  color: gray;
 }

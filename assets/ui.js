@@ -4,5 +4,6 @@ let ui = `
 <div class='fready_div' id='fready_ui'> 
   <div class='fready_button inline' id='savethisfready'>SAVE</div>
   <div class='fready_button inline' id='readthisfready'>READ</div>
+  <p class="meta">Logged into Fready: <strong id='username'> _ </strong></p>
 </div>
 `
