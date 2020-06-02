@@ -26,13 +26,16 @@ function sync_api(){
 
 class Fready {
   constructor(url, tab){
-    this.url = url
+    this.url = decodeURIComponent(url)
     this.tab = tab
     this.fetched = false
+    this.saved = false
     this.load()
     sync_api()
   }
+
   load(){
+    this.check_if_saved()
     if (check_url(this.url)){
       this.fetch()
     }else{
@@ -41,9 +44,11 @@ class Fready {
       if (this.active) { this.activate() }
     }
   }
+
   get active(){
     return this.tab == active_tab
   }
+
   get api_key(){
     return api_key
   }
@@ -102,7 +107,16 @@ class Fready {
       success: ()=>{ console.log('successfuly saved')},
       error: (e)=> { console.log(e)},
       dataType: "application/json"
-    });
+    })
+  }
+  unsave(){
+    $.ajax({
+      url: `${fready_api}/unsave_link?loc=${this.url}`,
+      type: "GET",
+      crossDomain: true,
+      success: ()=>{ console.log('successfuly unsaved')},
+      error: (e)=> { console.log(e)}
+    })
   }
   render(){
 
@@ -117,6 +131,23 @@ class Fready {
         chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab})
       }
     }
+  }
+
+  check_if_saved(){
+    $.ajax({
+      url: `${fready_api}/save_link?loc=${this.url}`,
+      type: 'GET',
+      crossDomain: true,
+      success: (data) => {
+        console.table('success', data)
+        this.saved = data
+        // chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
+      },
+      error: (data) => {
+        console.table('error', data)
+        this.saved = false
+      }
+    })
   }
 }
 
@@ -148,7 +179,7 @@ function remove_view(tab_id){
 chrome.tabs.onUpdated.addListener( (tabId, changeInfo, tab) => {
   // read changeInfo data and do something with it (like read the url)
   // console.log(changeInfo)
-  console.log(changeInfo)
+  // console.log(changeInfo)
   tab_cache[tabId].activate()
   if (changeInfo.url) {
     // console.log('changed url')
@@ -193,6 +224,9 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ frd: tab_cache[sender.tab.id]});
     if (request.request == "save")
       tab_cache[sender.tab.id].save()
+      sendResponse({ 'status': "complete "});
+    if (request.request == "unsave")
+      tab_cache[sender.tab.id].unsave()
       sendResponse({ 'status': "complete "});
   });
 

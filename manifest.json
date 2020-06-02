@@ -25,7 +25,7 @@
         ],
         "js": [
           "third_party/jquery.min.js",
-          "assets/icons.js",
+          "assets/ui.js",
           "injector.js"
         ],
         "css": [
