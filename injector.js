@@ -51,6 +51,13 @@ function showhide(){
   }
 }
 
+function save(){
+  console.log('saving')
+  chrome.runtime.sendMessage({ request: "save" }, function (response) {
+    console.log(response)
+  })
+}
+
 let ui = `
 <div class='fready_div' id='fready_ui'> 
   <div class='fready_button inline' id='savethisfready'>SAVE</div>
@@ -59,10 +66,13 @@ let ui = `
 `
 
 // document.getElementById("someImage").src = imgURL
-// $(document.body).prepend(ui)
+$(document.body).prepend(ui)
 // $("#heartthis").attr("src", imgURL)
 $("#readthisfready").click(()=>{
   showhide()
+})
+$("#savethisfready").click(()=>{
+  save()
 })
 // You can use native DOM methods to insert the fragment:
 // document.write('dicks')

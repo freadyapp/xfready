@@ -1,6 +1,28 @@
 const fready_api = "http://localhost:3000"
 let tab_cache = {} // tab_id & data
 let active_tab = null
+let api_key = get_api()
+
+function get_api(){
+  chrome.storage.sync.get(['freadyskey'], (result) => {
+    api_key = result.freadyskey
+  })
+}
+function sync_api(){
+  $.ajax({
+    url: `${fready_api}/myprofile/mykey`,
+    type: 'GET',
+    crossDomain: true,
+    success: (data) => {
+      chrome.storage.sync.set({ freadyskey: data }, function () {
+        api_key = data
+      })
+      // chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
+    },
+    error: (data) => { console.log('failed to sync api key') }
+  })
+  
+}
 
 class Fready {
   constructor(url, tab){
@@ -8,6 +30,7 @@ class Fready {
     this.tab = tab
     this.fetched = false
     this.load()
+    sync_api()
   }
   load(){
     if (check_url(this.url)){
@@ -20,6 +43,9 @@ class Fready {
   }
   get active(){
     return this.tab == active_tab
+  }
+  get api_key(){
+    return api_key
   }
   update(url){
     this.url = url
@@ -64,6 +90,19 @@ class Fready {
         // this.activate()
       }
     })
+  }
+  save(){
+    sync_api()
+    console.log(`${fready_api}/save_link?api_key=${api_key}`)
+    $.ajax({
+      url: `${fready_api}/save_link?api_key=${api_key}`,
+      type: "POST",
+      crossDomain: true,
+      data: { "loc": this.url },
+      success: ()=>{ console.log('successfuly saved')},
+      error: (e)=> { console.log(e)},
+      dataType: "application/json"
+    });
   }
   render(){
 
@@ -152,7 +191,12 @@ chrome.runtime.onMessage.addListener(
     console.log(tab_cache[sender.tab.id])
     if (request.request == "frd")
       sendResponse({ frd: tab_cache[sender.tab.id]});
+    if (request.request == "save")
+      tab_cache[sender.tab.id].save()
+      sendResponse({ 'status': "complete "});
   });
+
+
 
 // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 //   if (request.type == "worktimer-notification")
@@ -181,3 +225,4 @@ chrome.runtime.onMessage.addListener(
 //   })
 // })
 
+sync_api()
