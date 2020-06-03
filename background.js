@@ -1,6 +1,6 @@
 const fready_api = "http://localhost:3000"
 let x = null
-let active_tab = null 
+let active_fready = null 
 
 class xFreadyController{
   constructor(){
@@ -43,41 +43,20 @@ class xFreadyController{
       error: (e) => { console.table('failed to sync user data', e) }
     })
   }
-
   get api_key(){
     return this.api_key_value
   }
-  new_view(tab_id, url) {
-    // TODO fix this shit what the actual mother fucking fuck
-    console.table("x URL", url, check_url(url))
-    if (tab_id in this.tab_cache) {
-      let fready = this.tab_cache[tab_id]
-      if (url == fready.url) {
-        console.log('fready exists')
-      } else {
-        console.log('fready exists, but was outdated, reloading')
-        fready.update(url)
-      }
-    } else {
-      console.log('fready didnt exist, creating new, fetching')
-      this.tab_cache[tab_id] = new Fready(url, tab_id)
-    }
-  }
+  
   serve_view(tab_id, url){
     console.log(`serving view for tab #${tab_id} and url -> ${url}`)
-    if (tab_id in this.tab_cache) {
-      // tab is cached, serving from memory
-      let fready = this.tab_cache[tab_id]
-      if (url == fready.url) return fready
-      fready.update(url)
-      return fready
-    } else {
-      console.log('fready didnt exist, creating new, fetching')
-      this.tab_cache[tab_id] = new Fready(url, tab_id)
-      return this.tab_cache[tab_id]
-    }
+    if (url in this.tab_cache) { this.tab_cache[url].add_tab(tab_id); return this.tab_cache[url] }
+    this.tab_cache[url] = new Fready(url, tab_id)
+    console.table(this.tab_cache)
+    return this.tab_cache[url]
   }
+
   remove_view(tab_id) {
+    // update
     if (tab_id in this.tab_cache) {
       console.table("x", `tab cache of ${tab_id}`)
       delete this.tab_cache[tab_id]
@@ -88,11 +67,14 @@ class xFreadyController{
 class Fready {
   constructor(url, tab){
     this.url = decodeURIComponent(url)
-    this.tab = tab
+    this.tabs = [tab]
     this.fetched = false
-    this.saved = false
     this.load()
   }
+  add_tab(tab){
+    if (!(tab in this.tabs)) this.tabs.push(tab)
+  }
+
   load(){
     this.check_if_saved()
     if (check_url(this.url)){
@@ -104,7 +86,7 @@ class Fready {
     }
   }
   get active(){
-    return this.tab == active_tab
+    return this == active_fready
   }
 
   get api_key(){
@@ -115,7 +97,7 @@ class Fready {
     this.load()
   }
   activate(){
-    active_tab = this.tab
+    active_fready = this
     this.render_badge('.')
     if (this.fetched) {
       if (this.data['eta'] > 0){
@@ -156,14 +138,12 @@ class Fready {
   }
   save(){
     x.sync_api()
-    console.log(`${fready_api}/save_link?api_key=${this.api_key}`)
     $.ajax({
       url: `${fready_api}/save_link?api_key=${this.api_key}`,
       type: "POST",
       crossDomain: true,
       data: { "loc": this.url },
-      success: () =>{ console.log('successfuly saved')},
-      error: (e) => { console.log(e)},
+      error: (e) => { console.log(e) },
       dataType: "application/json"
     })
   }
@@ -173,19 +153,23 @@ class Fready {
       url: `${fready_api}/unsave_link?loc=${this.url}`,
       type: "GET",
       crossDomain: true,
-      success: () => { console.log('successfuly unsaved')},
-      error: (e) => { console.log(e)}
+      error: (e) => { console.log(e) }
     })
   }
 
   render_badge(txt){
     if (this.active){
       if (txt==''){
-        chrome.browserAction.setBadgeText({ text: "", tabId: this.tab})
-        chrome.browserAction.disable(this.tab)
+        this.tabs.forEach(tab => {
+          chrome.browserAction.setBadgeText({ text: "", tabId: tab })
+          // chrome.browserAction.disable(tab)
+        })
       }else{
-        chrome.browserAction.enable(this.tab)
-        chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab})
+        this.tabs.forEach( tab => {
+          chrome.browserAction.enable(this.tab)
+          chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab })
+        })
+          
       }
     }
   }
@@ -196,14 +180,20 @@ class Fready {
       type: 'GET',
       crossDomain: true,
       success: (data) => {
-        console.table('success', data)
         this.saved = data
-        // chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
+        // resolve(data)
       },
       error: (data) => {
         console.table('error checking if the article is loaded', data)
         this.saved = false
+        // resolve(false)
       }
+    }).then( () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { reload: this }, (response) => {
+          if (response) console.table('error', response)
+        })
+      })
     })
   }
 }
@@ -214,20 +204,23 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
-    console.log(sender.tab.id)
-    if (request.request == "frd")
+    if (request.request == "frd"){
       frd = x.serve_view(sender.tab.id, sender.tab.url)
       frd.activate()
-      sendResponse({ frd: frd});
-    if (request.request == "save")
-      x.tab_cache[sender.tab.id].save()
-      sendResponse({ 'status': "complete "});
-    if (request.request == "unsave")
-      x.tab_cache[sender.tab.id].unsave()
-      sendResponse({ 'status': "complete "});
-    if (request.request == "user")
-      sendResponse({ 'status': "complete "});
-  });
+      sendResponse({ frd: frd })
+    }
+    if (request.request == "save"){
+      x.tab_cache[sender.tab.url].save()
+      sendResponse({ 'status': "complete "})
+    }
+    if (request.request == "unsave"){
+      x.tab_cache[sender.tab.url].unsave()
+      sendResponse({ 'status': "complete "})
+    }
+    if (request.request == "user"){
+      sendResponse({ 'status': "complete "})
+    }
+});
 
 chrome.browserAction.onClicked.addListener(tab => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

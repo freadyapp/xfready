@@ -25,6 +25,14 @@ function perform_user_data_setup(){
 }
 
 // front
+function load_frd(inp){
+  console.table('loading new frd', inp)
+  frd = inp
+  if (frd.saved != inp){
+    console.log(`this article is actually ${frd.saved ? 'saved' : 'unsaved'}`)
+    saveunsave()
+  }
+}
 
 function readexit(){
   read = !read
@@ -74,6 +82,7 @@ function showhide(){
 // when loaded run this
 
 $(document.body).prepend(ui)
+
 $("#fready_ui")
   .fadeTo(0, 0.5)
   .css({ 'filter': 'saturate(0)' })
@@ -93,14 +102,17 @@ $(".freadyhide").click( () => {
   showhide()
 })
 
-chrome.runtime.sendMessage({ request: "frd" }, function (response) {
-  console.log(response.frd)
-  frd = response.frd
+chrome.runtime.sendMessage({ request: "frd" }, (response) => {
+  load_frd(response.frd)
   frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/xapi/read?loc=${frd['url']}" style="position:fixed;z-index:9696969696;" width="100%" height="100%"></iframe>`)
   frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=59" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
-  if (frd.saved) saveunsave()
+  // if (frd.saved) saveunsave()
 })
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
+  if (request.reload){
+    console.table('updating frd', request.reload)
+    load_frd(request.reload)
+  }
 })
