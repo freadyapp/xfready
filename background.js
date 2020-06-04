@@ -143,16 +143,35 @@ class Fready {
     this.url = url
     this.load()
   }
-  save(){
+  save(doc){
     x.sync_api()
-    $.ajax({
-      url: `${fready_api}/save_link?api_key=${this.api_key}`,
-      type: "POST",
-      crossDomain: true,
-      data: { "loc": this.url },
-      error: (e) => { console.log(e) },
-      dataType: "application/json"
-    })
+    if (doc) {
+      $.ajax({
+        url: `${fready_api}/save_link?api_key=${this.api_key}`,
+        type: 'POST',
+        crossDomain: true,
+        data: {
+          "loc": this.url,
+          "doc": doc
+        },
+        dataType: 'application/json',
+        success: (data) => {
+          this.id = data['id']
+        },
+        error: (data) => {
+          console.table(data)
+        }
+      })
+    }else{
+      $.ajax({
+        url: `${fready_api}/save_link?api_key=${this.api_key}`,
+        type: "POST",
+        crossDomain: true,
+        data: { "loc": this.url },
+        error: (e) => { console.log(e) },
+        dataType: "application/json"
+      })
+    }
   }
   unsave(){
     this.saved = false
@@ -176,7 +195,9 @@ class Fready {
       type: 'GET',
       crossDomain: true,
       success: (data) => {
-        this.saved = data
+        this.saved = data != null
+        this.id = this.saved ? data['id'] : 0
+        console.log(`this id is ${this.id}`)
       },
       error: (data) => {
         console.table('error checking if the article is loaded', data)
@@ -204,7 +225,8 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ frd: frd })
     }
     if (request.request == "save"){
-      x.freadies[sender.tab.url].save()
+      x.freadies[sender.tab.url].save(request.html)
+      console.table(request)
       sendResponse({ 'status': "complete "})
     }
     if (request.request == "unsave"){

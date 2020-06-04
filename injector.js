@@ -8,7 +8,7 @@ let show = false
 
 // talking with backend
 function perform_save() {
-  chrome.runtime.sendMessage({ request: "save" }, (response) => {
+  chrome.runtime.sendMessage({ request: "save", html: $('html')[0].outerHTML}, (response) => {
     console.log(response)
   })
 }
@@ -111,8 +111,9 @@ $(".freadyhide").click( () => {
 
 chrome.runtime.sendMessage({ request: "frd" }, (response) => {
   load_frd(response.frd)
-  frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/xapi/read?loc=${frd['url']}" style="position:fixed;z-index:9696969696;" width="100%" height="100%"></iframe>`)
-  frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=59" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  console.log(response.frd)
+  // frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/xapi/read?loc=${frd['url']}" style="position:fixed;z-index:9696969696;" width="100%" height="100%"></iframe>`)
+  frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=${frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
 })
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
