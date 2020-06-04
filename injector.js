@@ -25,13 +25,18 @@ function perform_user_data_setup(){
 }
 
 // front
+function visual_save(){
+  $("#savethisfready").addClass("inactive")
+  $("#savethisfready").html(`SAVED`)
+}
+function visual_unsave(){
+  $("#savethisfready").removeClass("inactive")
+  $("#savethisfready").html(`SAVE`)
+}
 function load_frd(inp){
   console.table('loading new frd', inp)
   frd = inp
-  if (frd.saved != inp){
-    console.log(`this article is actually ${frd.saved ? 'saved' : 'unsaved'}`)
-    saveunsave()
-  }
+  frd.saved ? visual_save() : visual_unsave()
 }
 
 function readexit(){
@@ -53,13 +58,11 @@ function readexit(){
 function saveunsave(){
   saved = !saved
   if (saved){
-    $("#savethisfready").addClass("inactive")
-    $("#savethisfready").html(`SAVED`)
+    visual_save()
     perform_save()
   }else{
     perform_unsave()
-    $("#savethisfready").removeClass("inactive")
-    $("#savethisfready").html(`SAVE`)
+    visual_unsave()
   }
 }
 

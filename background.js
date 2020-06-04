@@ -4,13 +4,13 @@ let active_fready = null
 
 class xFreadyController{
   constructor(){
-    this.tab_cache = {}
+    this.freadies = {}
     this.reload()
   }
   reload(flush){
     this.sync_user()
     this.sync_api()
-    if (flush) this.tab_cache = {}
+    if (flush) this.freadies = {}
   }
   sync_api() {
     console.table("x", `syncing with api`)
@@ -49,18 +49,24 @@ class xFreadyController{
   
   serve_view(tab_id, url){
     console.log(`serving view for tab #${tab_id} and url -> ${url}`)
-    if (url in this.tab_cache) { this.tab_cache[url].add_tab(tab_id); return this.tab_cache[url] }
-    this.tab_cache[url] = new Fready(url, tab_id)
-    console.table(this.tab_cache)
-    return this.tab_cache[url]
+    if (url in this.freadies) { this.freadies[url].add_tab(tab_id); return this.freadies[url] }
+    this.freadies[url] = new Fready(url, tab_id)
+    console.table(this.freadies)
+    return this.freadies[url]
   }
 
   remove_view(tab_id) {
-    // update
-    if (tab_id in this.tab_cache) {
-      console.table("x", `tab cache of ${tab_id}`)
-      delete this.tab_cache[tab_id]
-    }
+    console.table(`request to remove ${tab_id}`, this.freadies)
+    Object.entries(this.freadies).forEach(([url, fready]) => {
+      if (fready.tabs.includes(tab_id)) {
+        console.table('tab is on fready:', fready)
+        fready.remove_tab(tab_id)
+      }
+    })
+  }
+
+  remove_fready(url){
+    if (url in this.freadies) delete this.freadies[url]
   }
 }
 
@@ -71,10 +77,35 @@ class Fready {
     this.fetched = false
     this.load()
   }
-  add_tab(tab){
+  get active() {
+    return this == active_fready
+  }
+  get api_key() {
+    return x.api_key
+  }
+  self_destruct(){
+    x.remove_fready(this.url)
+  }
+  add_tab(tab) {
+    this.check_if_saved()
     if (!(tab in this.tabs)) this.tabs.push(tab)
   }
-
+  remove_tab(tab){
+    if (this.tabs.indexOf(tab) > -1) this.tabs.splice(this.tabs.indexOf(tab), 1)
+    if (this.tabs.length == 0) this.self_destruct()
+  }
+  activate() {
+    active_fready = this
+    this.render_badge('.')
+    if (this.fetched) {
+      if (this.data['eta'] > 0) {
+        this.render_badge(`${this.data['eta']}'`)
+      }
+      else {
+        this.render_badge('')
+      }
+    }
+  }
   load(){
     this.check_if_saved()
     if (check_url(this.url)){
@@ -85,56 +116,28 @@ class Fready {
       if (this.active) { this.activate() }
     }
   }
-  get active(){
-    return this == active_fready
-  }
-
-  get api_key(){
-    return x.api_key
-  }
-  update(url){
-    this.url = url
-    this.load()
-  }
-  activate(){
-    active_fready = this
-    this.render_badge('.')
-    if (this.fetched) {
-      if (this.data['eta'] > 0){
-        this.render_badge(`${this.data['eta']}'`)
-      }
-      else{
-        this.render_badge('')
-      }
-    }
-  }
-  fetch(){
-    // chrome.browserAction.setBadgeText({ text: '...' })
-    // this.render_badge('...')
+  fetch() {
     this.fetched = false
     $.ajax({
       url: `${fready_api}/article_prev?loc=${this.url}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
-        // console.log(data)
-        this.fetched = true
         this.data = data
-        // this.activate()
-        if (this.active){
-          // console.log('im done fetching and im still the fucking active tab what the fuck is up')
-          this.activate()
-        }
-        // chrome.browserAction.setBadgeText({ text: `${data['eta']} min.` })
       },
-      error: (data) => { 
+      error: (data) => {
+        this.data = { 'eta': 0 }
+      }
+    }).then(() => {
+      if (this.active) {
         this.fetched = true
-        // console.log("failed to fetch url")
-        this.render_badge('')
-        this.data = {'eta': 0}
-        // this.activate()
+        this.activate()
       }
     })
+  }
+  update(url){
+    this.url = url
+    this.load()
   }
   save(){
     x.sync_api()
@@ -156,24 +159,20 @@ class Fready {
       error: (e) => { console.log(e) }
     })
   }
-
   render_badge(txt){
     if (this.active){
       if (txt==''){
         this.tabs.forEach(tab => {
           chrome.browserAction.setBadgeText({ text: "", tabId: tab })
-          // chrome.browserAction.disable(tab)
         })
       }else{
         this.tabs.forEach( tab => {
           chrome.browserAction.enable(this.tab)
           chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab })
         })
-          
       }
     }
   }
-
   check_if_saved(){
     $.ajax({
       url: `${fready_api}/save_link?loc=${this.url}`,
@@ -181,12 +180,10 @@ class Fready {
       crossDomain: true,
       success: (data) => {
         this.saved = data
-        // resolve(data)
       },
       error: (data) => {
         console.table('error checking if the article is loaded', data)
         this.saved = false
-        // resolve(false)
       }
     }).then( () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -210,11 +207,11 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ frd: frd })
     }
     if (request.request == "save"){
-      x.tab_cache[sender.tab.url].save()
+      x.freadies[sender.tab.url].save()
       sendResponse({ 'status': "complete "})
     }
     if (request.request == "unsave"){
-      x.tab_cache[sender.tab.url].unsave()
+      x.freadies[sender.tab.url].unsave()
       sendResponse({ 'status': "complete "})
     }
     if (request.request == "user"){
@@ -229,8 +226,6 @@ chrome.browserAction.onClicked.addListener(tab => {
     })
   })
 })
-
-
 
 
 x = new xFreadyController
