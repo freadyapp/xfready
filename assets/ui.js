@@ -4,7 +4,7 @@ let ui = `
 <div class='fready_div' id='fready_ui'>
   <div class='fready_button inline' id='savethisfready'>SAVE</div>
   <div class='fready_button inline' id='readthisfready'>READ</div>
-  <p class="meta">Logged into Fready: <strong id='username'> _ </strong> </p>
+  <a href="http://localhost:3000" target="_blank"><p class="meta"> Logged into Fready: <strong id='username'> _ </strong></p></a>
   <div class='freadyhide' id='freadyhidebutton'> ^ </div>
   <div class='freadyhide' id='freadyhidebigbutton'></div>
 </div>

@@ -21,7 +21,6 @@ function sync_up_user(){
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
     user = data.freadyslovelyuser
     $("#username").text(user.name || "")
-
   })
 }
 
@@ -88,7 +87,6 @@ function showhide(){
   }
 }
 
-
 // when loaded run this
 sync_up_user()
 
@@ -115,7 +113,6 @@ chrome.runtime.sendMessage({ request: "frd" }, (response) => {
   load_frd(response.frd)
   frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/xapi/read?loc=${frd['url']}" style="position:fixed;z-index:9696969696;" width="100%" height="100%"></iframe>`)
   frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=59" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
-  // if (frd.saved) saveunsave()
 })
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

@@ -1,7 +1,6 @@
 const fready_api = "http://localhost:3000"
 let x = null
 let u = null
-let active_fready = null 
 
 class xFreadyUser{
   constructor(){
@@ -17,8 +16,6 @@ class xFreadyUser{
         this.email = data['email']
         this.prefs = JSON.parse(data['prefs'])
         chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
-          // console.table(data)
-          // console.log(new xFreadyUser(data))
           console.table('updating', this)
         })
       },
@@ -90,9 +87,6 @@ class Fready {
     this.fetched = false
     this.load()
   }
-  get active() {
-    return this == active_fready
-  }
   get api_key() {
     return x.api_key
   }
@@ -108,7 +102,6 @@ class Fready {
     if (this.tabs.length == 0) this.self_destruct()
   }
   activate() {
-    active_fready = this
     this.render_badge('.')
     if (this.fetched) {
       if (this.data['eta'] > 0) {
@@ -126,7 +119,7 @@ class Fready {
     }else{
       this.fetched = true
       this.data = { 'eta': 0 }
-      if (this.active) { this.activate() }
+      this.activate()
     }
   }
   fetch() {
@@ -142,10 +135,8 @@ class Fready {
         this.data = { 'eta': 0 }
       }
     }).then(() => {
-      if (this.active) {
-        this.fetched = true
-        this.activate()
-      }
+      this.fetched = true
+      this.activate()
     })
   }
   update(url){
@@ -173,18 +164,11 @@ class Fready {
     })
   }
   render_badge(txt){
-    if (this.active){
-      if (txt==''){
-        this.tabs.forEach(tab => {
-          chrome.browserAction.setBadgeText({ text: "", tabId: tab })
-        })
-      }else{
-        this.tabs.forEach( tab => {
-          chrome.browserAction.enable(this.tab)
-          chrome.browserAction.setBadgeText({ text: txt, tabId: this.tab })
-        })
-      }
-    }
+    this.tabs.forEach(tab => {
+      chrome.browserAction.enable(this.tab)
+      console.log(txt)
+      chrome.browserAction.setBadgeText({ text: txt, tabId: tab })
+    })
   }
   check_if_saved(){
     $.ajax({
@@ -243,4 +227,49 @@ chrome.browserAction.onClicked.addListener(tab => {
 
 u = new xFreadyUser
 x = new xFreadyController
+
+
+
+// async function on_frd_message(sender, cb) {
+//   frd = await x.serve_view(sender.tab.id, sender.tab.url)
+//   frd.activate()
+//   console.log('callign the fuck back')
+//   cb({ frd: frd })
+//   return frd
+// }
+
+// chrome.runtime.onMessage.addListener(
+//   (request, sender, sendResponse) => {
+//     if (request.request == "frd") {
+//       on_frd_message(sender, (frd) => { sendResponse(frd) })
+//       console.table('responding', 'sending frd')
+//       return true;
+//     }
+//     if (request.request == "save") {
+//       x.freadies[sender.tab.url].save()
+//       sendResponse({ 'status': "complete " })
+//       return true
+//     }
+//     if (request.request == "unsave") {
+//       x.freadies[sender.tab.url].unsave()
+//       sendResponse({ 'status': "complete " })
+//       return true
+//     }
+//     if (request.request == "user") {
+//       sendResponse({ 'status': "complete " })
+//       return true
+//     }
+//   });
+
+// chrome.browserAction.onClicked.addListener(tab => {
+//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//     chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, (response) => {
+//       if (response) console.table('error', response)
+//     })
+//   })
+// })
+
+
+// u = new xFreadyUser
+// x = new xFreadyController
 
