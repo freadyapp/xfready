@@ -1,10 +1,10 @@
+let user = null
 let frd = null
 let frame = null
 let read = false
 let saved = false
 let show = false
 
-let name = ""
 
 // talking with backend
 function perform_save() {
@@ -17,10 +17,11 @@ function perform_unsave() {
     console.log(response)
   })
 }
-function perform_user_data_setup(){
-  chrome.storage.sync.get(['freadysusername'], (result) => {
-    name = result.freadysusername || ""
-    $("#username").text(name)
+function sync_up_user(){
+  chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
+    user = data.freadyslovelyuser
+    $("#username").text(user.name || "")
+
   })
 }
 
@@ -36,7 +37,13 @@ function visual_unsave(){
 function load_frd(inp){
   console.table('loading new frd', inp)
   frd = inp
-  frd.saved ? visual_save() : visual_unsave()
+  if (frd.saved){
+    visual_save()
+    saved = true
+  }else{
+    visual_unsave()
+    saved = false
+  }
 }
 
 function readexit(){
@@ -83,6 +90,7 @@ function showhide(){
 
 
 // when loaded run this
+sync_up_user()
 
 $(document.body).prepend(ui)
 
@@ -90,8 +98,6 @@ $("#fready_ui")
   .fadeTo(0, 0.5)
   .css({ 'filter': 'saturate(0)' })
   .slideUp(0)
-// showhide()
-perform_user_data_setup()
 
 $("#readthisfready").click(() => {
   readexit()

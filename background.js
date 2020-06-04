@@ -1,6 +1,31 @@
 const fready_api = "http://localhost:3000"
 let x = null
+let u = null
 let active_fready = null 
+
+class xFreadyUser{
+  constructor(){
+    this.sync()
+  }
+  sync() {
+    $.ajax({
+      url: `${fready_api}/xapi/user`,
+      type: 'GET',
+      crossDomain: true,
+      success: (data) => {
+        this.name = data['name']
+        this.email = data['email']
+        this.prefs = JSON.parse(data['prefs'])
+        chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
+          // console.table(data)
+          // console.log(new xFreadyUser(data))
+          console.table('updating', this)
+        })
+      },
+      error: (e) => { console.table('failed to sync user data', e) }
+    })
+  }
+}
 
 class xFreadyController{
   constructor(){
@@ -8,7 +33,7 @@ class xFreadyController{
     this.reload()
   }
   reload(flush){
-    this.sync_user()
+    u.sync()
     this.sync_api()
     if (flush) this.freadies = {}
   }
@@ -24,23 +49,11 @@ class xFreadyController{
       success: (data) => {
         chrome.storage.sync.set({ freadyskey: data }, (e) => {
           this.api_key_value = data
+          console.table('api key', data)
           if (e) console.table("error in freadys backend", e)
         })
       },
       error: (data) => { console.table('failed to sync api key', data) }
-    })
-  }
-  sync_user() {
-    $.ajax({
-      url: `${fready_api}/xapi/user`,
-      type: 'GET',
-      crossDomain: true,
-      success: (data) => {
-        chrome.storage.sync.set({ freadysusername: data['name'] }, (e) => {
-          if (e) console.table("error in freadys backend", e)
-        })
-      },
-      error: (e) => { console.table('failed to sync user data', e) }
     })
   }
   get api_key(){
@@ -228,6 +241,6 @@ chrome.browserAction.onClicked.addListener(tab => {
 })
 
 
+u = new xFreadyUser
 x = new xFreadyController
-x.sync_api()
-x.sync_user()
+
