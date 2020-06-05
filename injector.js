@@ -5,16 +5,15 @@ let read = false
 let saved = false
 let show = false
 
-
 // talking with backend
 function perform_save() {
   chrome.runtime.sendMessage({ request: "save", html: $('html')[0].outerHTML}, (response) => {
-    console.log(response)
+    log(response)
   })
 }
 function perform_unsave() {
   chrome.runtime.sendMessage({ request: "unsave" }, (response) => {
-    console.log(response)
+    log(response)
   })
 }
 function sync_up_user(){
@@ -34,8 +33,8 @@ function visual_unsave(){
   $("#savethisfready").html(`SAVE`)
 }
 function load_frd(frd){
-  console.table('loading new frd', frd)
-  frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=${frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  table('loading new frd', frd)
+  frame = $(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
   if (frd.saved){
     visual_save()
     saved = true
@@ -109,20 +108,20 @@ $(".freadyhide").click( () => {
   showhide()
 })
 
-console.log('sending frd response')
+log('sending frd response')
 
 chrome.runtime.sendMessage({ request: "frd" }, (response) => {
-  console.log(response)
-  // load_frd(response.frd)
-  // console.log(response.frd)
-  // frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/xapi/read?loc=${frd['url']}" style="position:fixed;z-index:9696969696;" width="100%" height="100%"></iframe>`)
-  // frame = $(`<iframe id="freadysscreen" src="http://localhost:3000/lector?art=${frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  table(response)
 })
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
+  if (request.user){
+    sync_up_user(request.user)
+  }
   if (request.frd){
-    console.table('updating frd', request.frd)
+    table('updating frd', request.frd)
     load_frd(request.frd)
   }
+  sendResponse('ok')
 })
