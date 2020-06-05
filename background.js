@@ -205,7 +205,7 @@ class Fready {
       }
     }).then( () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { reload: this }, (response) => {
+        chrome.tabs.sendMessage(tabs[0].id, { frd: this }, (response) => {
           if (response) console.table('error', response)
         })
       })
@@ -217,19 +217,36 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
 
+function send_new_frd(sender){
+  frd = x.serve_view(sender.tab.id, sender.tab.url)
+  frd.activate()
+  // frd = "new Fready"
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(tabs[0].id, { frd: frd }, (response) => {
+      if (response) console.table('error', response)
+    })
+  })
+}
+
+
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
+    console.table(request)
     if (request.request == "frd"){
-      frd = x.serve_view(sender.tab.id, sender.tab.url)
-      frd.activate()
-      sendResponse({ frd: frd })
+      // frd = x.serve_view(sender.tab.id, sender.tab.url)
+      // frd.activate()
+      console.log('request recieved for frd')
+      sendResponse({ msg: "sending" })
+      send_new_frd(sender)
+      return true;
     }
     if (request.request == "save"){
-      x.freadies[sender.tab.url].save(request.html)
       console.table(request)
+      x.freadies[sender.tab.url].save(request.html)
       sendResponse({ 'status': "complete "})
     }
     if (request.request == "unsave"){
+      console.table(request)
       x.freadies[sender.tab.url].unsave()
       sendResponse({ 'status': "complete "})
     }
