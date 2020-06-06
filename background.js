@@ -137,7 +137,7 @@ class Fready {
   fetch() {
     this.fetched = false
     $.ajax({
-      url: `${FREADY_API}/article_prev?loc=${this.url}`,
+      url: `${FREADY_API}/xapi/preview?loc=${this.url}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
