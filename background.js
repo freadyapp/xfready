@@ -159,12 +159,14 @@ class Fready {
     x.sync_api()
     if (doc) {
       $.ajax({
-        url: `${FREADY_API}/save_link?api_key=${this.api_key}`,
+        url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
         type: 'POST',
         crossDomain: true,
         data: {
-          "loc": this.url,
-          "doc": doc
+          "link": {
+            "loc": this.url,
+            "doc": doc
+          }
         },
         dataType: 'application/json',
         success: (data) => {
@@ -176,10 +178,10 @@ class Fready {
       })
     }else{
       $.ajax({
-        url: `${FREADY_API}/save_link?api_key=${this.api_key}`,
+        url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
         type: "POST",
         crossDomain: true,
-        data: { "loc": this.url },
+        data: { "link": { "loc": this.url } },
         error: (e) => { log(e) },
         dataType: "application/json"
       })
