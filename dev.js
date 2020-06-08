@@ -1,5 +1,5 @@
-const FREADY_API = "http://localhost:3000"
 const DEVELOPMENT = true
+const FREADY_API = DEVELOPMENT ? "http://localhost:3000" : "https://www.fready.co"
 
 function log(txt) {
   if (!DEVELOPMENT) return true

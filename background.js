@@ -15,7 +15,7 @@ class xFreadyUser{
         table(data)
         this.name = data['name']
         this.email = data['email']
-        this.prefs = JSON.parse(data['prefs'])
+        this.prefs = data['prefs']
         this.api_key = data['key']
         chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
           table('updating', this)
@@ -33,8 +33,7 @@ class xFreadyUser{
   sync_tabs(){
     Object.entries(x.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
-        try:
-          chrome.tabs.sendMessage(tab, { user: this }, (response) => {
+        chrome.tabs.sendMessage(tab, { user: this }, (response) => {
           if (response) table(response)
         })
       })
@@ -143,7 +142,18 @@ class Fready {
     this.url = url
     this.load()
   }
-  save(doc){
+  read(doc){
+    if (this.saved){
+      this.send('read')
+    }else{
+      this.save(doc, (
+        ()=>{
+          this.send('read')
+        }
+      ))
+    }
+  }
+  save(doc, cb=(()=>{ this.send() })){
     this.saved = true
     $.ajax({
       url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
@@ -162,7 +172,7 @@ class Fready {
         log('succesfully recieved new frd')
         table(data.link)
         this.id = data.link.id
-        this.send()
+        cb()
       },
       error: (data) => {
         log('error when recieved new frd')
@@ -203,12 +213,11 @@ class Fready {
       }
     }).then(()=>{
       this.send()
-
     })
   }
-  send(){
+  send(command=null){
     this.tabs.forEach( (tab)=>{
-      chrome.tabs.sendMessage(tab, { frd: this }, (response) => {
+      chrome.tabs.sendMessage(tab, { frd: this, cmd: command }, (response) => {
         if (response) table(response)
         log('sent to the view')
         table(this)
@@ -233,6 +242,11 @@ chrome.runtime.onMessage.addListener(
       log('request to save')
       x.freadies[sender.tab.url].save(request.html)
       sendResponse({ 'status': "complete "})
+    }
+    if (request.request == "read"){
+      log('request to read')
+      x.freadies[sender.tab.url].read(request.html)
+      sendResponse({ 'status': "ok "})
     }
     if (request.request == "unsave"){
       log('request to unsave')

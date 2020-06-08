@@ -6,6 +6,19 @@ let saved = false
 let show = false
 
 // talking with backend
+function request_new_frd() {
+  log('requesting new frd')
+  chrome.runtime.sendMessage({ request: "frd" }, (response) => {
+    table(response)
+  })
+}
+function request_read() {
+  log('requesting read frd')
+  chrome.runtime.sendMessage({ request: "read" }, (response) => {
+    table(response)
+  })
+}
+
 function perform_save() {
   chrome.runtime.sendMessage({ request: "save", html: $('html')[0].outerHTML}, (response) => {
     log(response)
@@ -32,7 +45,7 @@ function visual_unsave(){
   $("#savethisfready").removeClass("inactive")
   $("#savethisfready").html(`SAVE`)
 }
-function load_frd(local_frd){
+function load_frd(local_frd, cmd=null){
   frd = local_frd
   table('loading new frd')
   table(frd)
@@ -40,6 +53,12 @@ function load_frd(local_frd){
   if (local_frd.saved){
     visual_save()
     saved = true
+    if (cmd != null && cmd == 'read'){
+      console.log('i need to read')
+      $(document.body).fadeTo(200, 1)
+      read = false
+      readexit()
+    }
   }else{
     visual_unsave()
     saved = false
@@ -48,14 +67,17 @@ function load_frd(local_frd){
 
 function readexit(){
   read = !read
-  if (read){
-    $("#readthisfready").addClass("exit")
-    $("#readthisfready").text(`EXIT`)
+  if (frd !=null && read){
     table(frd)
-    if (frd != null && frd.saved){
+    if (frd.saved){
+      $("#readthisfready").addClass("exit")
+      $("#readthisfready").text(`EXIT`)
       $(document.body).prepend(frame)
       $(frame).fadeTo(0, 0.01)
       $(frame).fadeTo(200, 1)
+    }else{
+      request_read()
+      $(document.body).fadeTo(200, 0.5)
     }
   }else{
     $("#readthisfready").removeClass("exit")
@@ -112,11 +134,8 @@ $(".freadyhide").click( () => {
   showhide()
 })
 
-log('sending frd response')
 
-chrome.runtime.sendMessage({ request: "frd" }, (response) => {
-  table(response)
-})
+request_new_frd()
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
@@ -125,8 +144,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   if (request.frd){
     log('updating frd')
-    table(request.frd)
-    load_frd(request.frd)
+    table(request)
+    load_frd(request.frd, request.cmd)
   }
   sendResponse('ok')
 })
