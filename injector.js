@@ -32,10 +32,12 @@ function visual_unsave(){
   $("#savethisfready").removeClass("inactive")
   $("#savethisfready").html(`SAVE`)
 }
-function load_frd(frd){
-  table('loading new frd', frd)
-  frame = $(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
-  if (frd.saved){
+function load_frd(local_frd){
+  frd = local_frd
+  table('loading new frd')
+  table(frd)
+  frame = $(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  if (local_frd.saved){
     visual_save()
     saved = true
   }else{
@@ -49,11 +51,13 @@ function readexit(){
   if (read){
     $("#readthisfready").addClass("exit")
     $("#readthisfready").text(`EXIT`)
-    $(document.body).prepend(frame)
-    $(frame).fadeTo(0, 0.01)
-    $(frame).fadeTo(200, 1)
+    table(frd)
+    if (frd != null && frd.saved){
+      $(document.body).prepend(frame)
+      $(frame).fadeTo(0, 0.01)
+      $(frame).fadeTo(200, 1)
+    }
   }else{
-
     $("#readthisfready").removeClass("exit")
     $("#readthisfready").text(`READ`)
     $(frame).fadeTo(200, 0.01, () => { $(frame).remove()})
@@ -120,7 +124,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sync_up_user(request.user)
   }
   if (request.frd){
-    table('updating frd', request.frd)
+    log('updating frd')
+    table(request.frd)
     load_frd(request.frd)
   }
   sendResponse('ok')

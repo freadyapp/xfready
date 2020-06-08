@@ -6,16 +6,23 @@ class xFreadyUser{
     this.sync()
   }
   sync() {
+    log('syncing user')
     $.ajax({
       url: `${FREADY_API}/xapi/user`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
+        table(data)
         this.name = data['name']
         this.email = data['email']
         this.prefs = JSON.parse(data['prefs'])
+        this.api_key = data['key']
         chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
           table('updating', this)
+        })
+        chrome.storage.sync.set({ freadyskey: data }, (e) => {
+          log(`api key, ${data}`)
+          if (e) table("error in freadys backend", e)
         })
       },
       error: (e) => { table('failed to sync user data', e) }
@@ -26,7 +33,8 @@ class xFreadyUser{
   sync_tabs(){
     Object.entries(x.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
-        chrome.tabs.sendMessage(tab, { user: this }, (response) => {
+        try:
+          chrome.tabs.sendMessage(tab, { user: this }, (response) => {
           if (response) table(response)
         })
       })
@@ -37,34 +45,14 @@ class xFreadyUser{
 class xFreadyController{
   constructor(){
     this.freadies = {}
-    this.sync_api()
   }
   reload(flush){
     u.sync()
-    this.sync_api()
     if (flush) this.freadies = {}
   }
-  sync_api() {
-    table("x", `syncing with api`)
-    chrome.storage.sync.get(['freadyskey'], (result) => {
-      this.api_key_value = result.freadyskey
-    })
-    $.ajax({
-      url: `${FREADY_API}/myprofile/mykey`,
-      type: 'GET',
-      crossDomain: true,
-      success: (data) => {
-        chrome.storage.sync.set({ freadyskey: data }, (e) => {
-          this.api_key_value = data
-          table('api key', data)
-          if (e) table("error in freadys backend", e)
-        })
-      },
-      error: (data) => { table('failed to sync api key', data) }
-    })
-  }
+
   get api_key(){
-    return this.api_key_value
+    return u.api_key
   }
   
   serve_view(tab_id, url){
@@ -156,36 +144,31 @@ class Fready {
     this.load()
   }
   save(doc){
-    x.sync_api()
-    if (doc) {
-      $.ajax({
-        url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
-        type: 'POST',
-        crossDomain: true,
-        data: {
-          "link": {
-            "loc": this.url,
-            "doc": doc
-          }
-        },
-        dataType: 'application/json',
-        success: (data) => {
-          this.id = data['id']
-        },
-        error: (data) => {
-          table(data)
+    this.saved = true
+    $.ajax({
+      url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
+      type: 'POST',
+      crossDomain: true,
+      dataType: 'text json',
+      data: {
+        "link":  doc ? {
+          "loc": this.url,
+          "doc": doc
+        }:{
+          "loc": this.url
         }
-      })
-    }else{
-      $.ajax({
-        url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
-        type: "POST",
-        crossDomain: true,
-        data: { "link": { "loc": this.url } },
-        error: (e) => { log(e) },
-        dataType: "application/json"
-      })
-    }
+      },
+      success: (data) => {
+        log('succesfully recieved new frd')
+        table(data.link)
+        this.id = data.link.id
+        this.send()
+      },
+      error: (data) => {
+        log('error when recieved new frd')
+        table(data)
+      }
+    })
   }
   unsave(){
     this.saved = false
@@ -194,12 +177,13 @@ class Fready {
       type: "GET",
       crossDomain: true,
       error: (e) => { log(e) }
+    }).then(() => {
+      this.send()
     })
   }
   render_badge(txt){
     this.tabs.forEach(tab => {
       chrome.browserAction.enable(this.tab)
-      log(txt)
       chrome.browserAction.setBadgeText({ text: txt, tabId: tab })
     })
   }
@@ -227,6 +211,7 @@ class Fready {
       chrome.tabs.sendMessage(tab, { frd: this }, (response) => {
         if (response) table(response)
         log('sent to the view')
+        table(this)
       })
     })
   }
@@ -245,12 +230,12 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ msg: "ok" })
     }
     if (request.request == "save"){
-      table(request)
+      log('request to save')
       x.freadies[sender.tab.url].save(request.html)
       sendResponse({ 'status': "complete "})
     }
     if (request.request == "unsave"){
-      table(request)
+      log('request to unsave')
       x.freadies[sender.tab.url].unsave()
       sendResponse({ 'status': "complete "})
     }
@@ -260,6 +245,7 @@ chrome.runtime.onMessage.addListener(
 });
 
 chrome.browserAction.onClicked.addListener(tab => {
+  u.sync()
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, (response) => {
       if (response) table(response)
