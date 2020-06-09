@@ -1,8 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600&family=Reem+Kufi&family=Roboto:wght@500&display=swap');
 
-#fready_ui{
+fready {
+  all: initial;
+  user-select:none;
   transition: all .5 ease;
-  all: revert;
   /* display: none; */
   font-family: 'Open Sans', sans-serif;
   /* background: #2B6CCE;  */
@@ -23,7 +24,12 @@
   text-align: center;
 }
 
-#fready_ui .fready_button{
+fready a{
+  all: initial;
+  cursor: pointer;
+}
+
+fready-button {
   transition: all .5 ease;
   all: revert;
   font-family: Roboto;
@@ -38,42 +44,42 @@
   /* line-height: 20px; */
 }
 
-#fready_ui .fready_button:hover{
+fready-button:hover{
   background-color: rgb(38, 92, 173);
   border: 2px solid rgb(38, 93, 182);
   box-shadow: -0px 0px 15px rgba(0, 0, 0, 0.30);
   color: white;
 }
 
-#fready_ui .inline{
+fready .inline{
   display: inline-block;
 }
 
-#fready_ui .inactive{
+fready .inactive{
   background-color: transparent;
   color: gray;
   border: 2px solid transparent;
 }
 
-#fready_ui .inactive:hover{
+fready .inactive:hover{
   background-color: lightblue;
   border: 2px solid black;
   color: black;
 }
 
-#fready_ui .exit{
+fready .exit{
   background-color: transparent;
   color: #2B6CCE;
   border: 2px solid transparent;
 }
 
-#fready_ui .meta{
+fready .meta{
   font-size: 8px;
   font-family: 'Open Sans';
   color: gray;
 }
 
-#fready_ui #freadyhidebutton{
+fready #freadyhidebutton{
   font-family: 'Reem Kufi';
   font-size: 24px;
   display: inline;
@@ -84,7 +90,8 @@
   padding: 5px;
   color: gray;
 }
-#fready_ui #freadyhidebigbutton{
+
+fready #freadyhidebigbutton{
   z-index: -1;
   background-color: transparent;
   position: absolute;

@@ -32,7 +32,14 @@ function perform_unsave() {
 function sync_up_user(){
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
     user = data.freadyslovelyuser
-    $("#username").text(user.name || "")
+    if (user.name) {
+      $("#loggedinlink").show()
+      $("#loggedoutlink").hide()
+      $("#username").text(user.name)
+    }else{
+      $("#loggedinlink").hide()
+      $("#loggedoutlink").show()
+    }
   })
 }
 

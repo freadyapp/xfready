@@ -8,7 +8,7 @@ class xFreadyUser{
   sync() {
     log('syncing user')
     $.ajax({
-      url: `${FREADY_API}/xapi/user`,
+      url: `${FREADY_API}/xapi/user.json`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
@@ -17,16 +17,22 @@ class xFreadyUser{
         this.email = data['email']
         this.prefs = data['prefs']
         this.api_key = data['key']
-        chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
-          table('updating', this)
-        })
         chrome.storage.sync.set({ freadyskey: data }, (e) => {
           log(`api key, ${data}`)
           if (e) table("error in freadys backend", e)
         })
       },
-      error: (e) => { table('failed to sync user data', e) }
+      error: (e) => { 
+        table('failed to sync user data', e)
+        this.name = ""
+        this.email = ""
+        this.prefs = ""
+        this.api_key = ""
+    }
     }).then(()=>{
+      chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
+        table('updating', this)
+      })
       this.sync_tabs()
     })
   }
