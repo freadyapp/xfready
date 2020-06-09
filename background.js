@@ -24,12 +24,8 @@ class xFreadyUser{
       },
       error: (e) => { 
         table('failed to sync user data', e)
-        this.name = ""
-        this.email = ""
-        this.prefs = ""
-        this.api_key = ""
-    }
-    }).then(()=>{
+      }
+    }).then( () => {
       chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
         table('updating', this)
       })

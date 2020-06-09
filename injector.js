@@ -1,9 +1,13 @@
 let user = null
 let frd = null
-let frame = null
+let frame = $(`<lector></lector>`)
 let read = false
 let saved = false
 let show = false
+
+function slurp_body(){
+  return $(document.body).html()
+}
 
 // talking with backend
 function request_new_frd() {
@@ -12,23 +16,30 @@ function request_new_frd() {
     table(response)
   })
 }
-function request_read() {
-  log('requesting read frd')
-  chrome.runtime.sendMessage({ request: "read" }, (response) => {
-    table(response)
-  })
-}
 
-function perform_save() {
-  chrome.runtime.sendMessage({ request: "save", html: $('html')[0].outerHTML}, (response) => {
+function request(request_str){
+  chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
     log(response)
   })
 }
+function request_read() {
+  log('requesting read frd')
+  table(slurp_body())
+  request("read")
+}
+
+function perform_save() {
+  log("saving")
+  table(slurp_body())
+  request("save")
+}
+
 function perform_unsave() {
   chrome.runtime.sendMessage({ request: "unsave" }, (response) => {
     log(response)
   })
 }
+
 function sync_up_user(){
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
     user = data.freadyslovelyuser
@@ -52,16 +63,17 @@ function visual_unsave(){
   $("#savethisfready").removeClass("inactive")
   $("#savethisfready").html(`SAVE`)
 }
+
 function load_frd(local_frd, cmd=null){
   frd = local_frd
   table('loading new frd')
   table(frd)
-  frame = $(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
   if (local_frd.saved){
     visual_save()
     saved = true
     if (cmd != null && cmd == 'read'){
-      console.log('i need to read')
+      log('i need to read')
       $(document.body).fadeTo(200, 1)
       read = false
       readexit()
@@ -79,7 +91,8 @@ function readexit(){
     if (frd.saved){
       $("#readthisfready").addClass("exit")
       $("#readthisfready").text(`EXIT`)
-      $(document.body).prepend(frame)
+      $(frame).insertAfter(document.body)
+      $(document.body).fadeOut()
       $(frame).fadeTo(0, 0.01)
       $(frame).fadeTo(200, 1)
     }else{
@@ -89,7 +102,8 @@ function readexit(){
   }else{
     $("#readthisfready").removeClass("exit")
     $("#readthisfready").text(`READ`)
-    $(frame).fadeTo(200, 0.01, () => { $(frame).remove()})
+    $(document.body).fadeIn()
+    $(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
   }
 }
 
@@ -121,28 +135,23 @@ function showhide(){
 
 // when loaded run this
 sync_up_user()
-
-$(document.body).prepend(ui)
+$(ui).insertAfter(document.body)
+request_new_frd()
 
 $("#fready_ui")
   .fadeTo(0, 0.5)
   .css({ 'filter': 'saturate(0)' })
   .slideUp(0)
 
-$("#readthisfready").click(() => {
+$("#readthisfready").click( () => {
   readexit()
 })
-
 $("#savethisfready").click( () => {
   saveunsave()
 })
-
 $(".freadyhide").click( () => {
   showhide()
 })
-
-
-request_new_frd()
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
