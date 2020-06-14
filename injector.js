@@ -69,26 +69,29 @@ function load_frd(local_frd, cmd=null){
   table('loading new frd')
   table(frd)
   $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  
+  if (cmd != null && cmd == 'read') {
+    log('i need to read')
+    $(document.body).fadeTo(200, 1)
+    read = false
+    readexit(true)
+  }
+
   if (local_frd.saved){
     visual_save()
     saved = true
-    if (cmd != null && cmd == 'read'){
-      log('i need to read')
-      $(document.body).fadeTo(200, 1)
-      read = false
-      readexit()
-    }
   }else{
     visual_unsave()
     saved = false
   }
+
 }
 
-function readexit(){
+function readexit(pop=false){
   read = !read
   if (frd !=null && read){
     table(frd)
-    if (frd.saved){
+    if (pop){
       $("#readthisfready").addClass("exit")
       $("#readthisfready").text(`EXIT`)
       $(frame).insertAfter(document.body)

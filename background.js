@@ -148,11 +148,11 @@ class Fready {
         ()=>{
           this.send('read')
         }
-      ))
+      ), false)
     }
   }
-  save(doc, cb=(()=>{ this.send() })){
-    this.saved = true
+  save(doc, cb = (() => { this.send() }), hard_save = true){
+    this.saved = hard_save
     $.ajax({
       url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
       type: 'POST',
@@ -164,7 +164,8 @@ class Fready {
           "doc": doc
         }:{
           "loc": this.url
-        }
+        },
+        "save": hard_save
       },
       success: (data) => {
         log('succesfully recieved new frd')
