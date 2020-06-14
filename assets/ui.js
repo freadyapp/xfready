@@ -6,15 +6,24 @@ const home = `<svg xmlns="http://www.w3.org/2000/svg" height="23" viewBox="0 0 2
     d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" />
   </svg>`
 
+const expand_less = `
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 0h24v24H0V0z" fill="none" />
+  <path
+    d="M11.29 8.71L6.7 13.3c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 10.83l3.88 3.88c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L12.7 8.71c-.38-.39-1.02-.39-1.41 0z" />
+</svg>
+`
 const ui = `
+
 <fready>
   <fready-block class='fready_div' id='fready_ui'>
     <a href='${FREADY_API}' target="_blank"><fready-icon id="fready_home">${home}</fready-icon></a>
-    <fready-button class='fready_button inline' id='savethisfready'>SAVE</fready-button>
+    <fready-button class='fready_button inline ghost' id='savethisfready'>SAVE</fready-button>
     <fready-button class='fready_button inline' id='readthisfready'>READ</fready-button>
     <a href=${FREADY_API} id='loggedinlink' target="_blank"><fready-p class="meta"> Logged into Fready: <strong id='username'> _ </strong></fready-p></a>
-    <a href='${FREADY_API}/users/sign_in' id='loggedoutlink' style='display:none;' target="_blank"><fready-p class="meta"> Not logged in <strong id='username'> LOG IN </strong></fready-p></a>
-    <fready-div class='freadyhide' id='freadyhidebutton'> ^ </fready-div>
+    <a href='${FREADY_API}/users/sign_in' id='loggedoutlink' style='display:none;' target="_blank"><br><fready-p class="meta"> <strong id='username'> LOG IN | SIGN UP </strong></fready-p></a>
+    <fready-div class='freadyhide' id='freadyhidebutton'> ${expand_less} </fready-div>
     <fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>
   </fready-block>
 </fready>
