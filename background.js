@@ -17,10 +17,6 @@ class xFreadyUser{
         this.email = data['email']
         this.prefs = data['prefs']
         this.api_key = data['key']
-        chrome.storage.sync.set({ freadyskey: data }, (e) => {
-          log(`api key, ${data}`)
-          if (e) table("error in freadys backend", e)
-        })
       },
       error: (e) => { 
         table('failed to sync user data', e)
@@ -272,3 +268,23 @@ chrome.browserAction.onClicked.addListener(tab => {
 
 u = new xFreadyUser
 x = new xFreadyController
+
+
+chrome.runtime.onInstalled.addListener(function () {
+  // chrome.contextMenus.create({
+  //   "id": "sampleContextMenu",
+  //   "title": "Sample Context Menu",
+  //   "contexts": ["selection"]
+  // });
+  log('FREADY-HAS-BEEN-INSTALLED!')
+
+  // chrome.notifications.create('fready_log_in', {
+  //   type: 'basic',
+  //   iconUrl: 'assets/logos/fready_logo_128.png',
+  //   title: 'Fready has been downloaded!',
+  //   message: 'You are not logged in. Click me to log in!'
+  // }, (notificationId) => { log(notificationId) });
+  chrome.tabs.create({
+    url: `${FREADY_API}/welcome`
+  });
+});
