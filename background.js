@@ -122,7 +122,7 @@ class Fready {
   fetch() {
     this.fetched = false
     $.ajax({
-      url: `${FREADY_API}/xapi/preview?loc=${this.url}`,
+      url: `${FREADY_API}/xapi/preview?loc=${this.url}&api_key=${this.api_key}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
@@ -165,7 +165,8 @@ class Fready {
         }:{
           "loc": this.url
         },
-        "save": hard_save
+        "save": hard_save,
+        "api_key": this.api_key
       },
       success: (data) => {
         log('succesfully recieved new frd')
@@ -182,7 +183,7 @@ class Fready {
   unsave(){
     this.saved = false
     $.ajax({
-      url: `${FREADY_API}/unsave_link?loc=${this.url}`,
+      url: `${FREADY_API}/unsave_link?loc=${this.url}&api_key=${this.api_key}`,
       type: "GET",
       crossDomain: true,
       error: (e) => { log(e) }
@@ -198,7 +199,7 @@ class Fready {
   }
   check_if_saved(){
     $.ajax({
-      url: `${FREADY_API}/save_link?loc=${this.url}`,
+      url: `${FREADY_API}/save_link?loc=${this.url}&api_key=${this.api_key}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {

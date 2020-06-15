@@ -21,7 +21,7 @@ const ui = `
     <a href='${FREADY_API}' target="_blank"><fready-icon id="fready_home">${home}</fready-icon></a>
     <fready-button class='fready_button inline ghost' id='savethisfready'>SAVE</fready-button>
     <fready-button class='fready_button inline' id='readthisfready'>READ</fready-button>
-    <a href=${FREADY_API} id='loggedinlink' target="_blank"><fready-p class="meta"> Logged into Fready: <strong id='username'> _ </strong></fready-p></a>
+    <a href='${FREADY_API}' id='loggedinlink' target="_blank"><fready-p class="meta"> Logged into Fready: <strong id='username'> _ </strong></fready-p></a>
     <a href='${FREADY_API}/users/sign_in' id='loggedoutlink' style='display:none;' target="_blank"><br><fready-p class="meta"> <strong id='username'> LOG IN | SIGN UP </strong></fready-p></a>
     <fready-div class='freadyhide' id='freadyhidebutton'> ${expand_less} </fready-div>
     <fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>

@@ -68,7 +68,7 @@ function load_frd(local_frd, cmd=null){
   frd = local_frd
   table('loading new frd')
   table(frd)
-  $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+  $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
   
   if (cmd != null && cmd == 'read') {
     log('i need to read')
