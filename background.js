@@ -260,6 +260,8 @@ chrome.runtime.onMessage.addListener(
 })
 chrome.browserAction.onClicked.addListener(tab => {
   u.sync()
+  log(x.freadies[tab.url])
+  x.freadies[tab.url].check_if_saved()
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, (response) => {
       if (response) table(response)
