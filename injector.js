@@ -9,7 +9,7 @@ function slurp_body(){
   return $(document.body).html()
 }
 
-// talking with backend
+// ------------ talking with background ------------ //
 function request_new_frd() {
   log('requesting new frd')
   chrome.runtime.sendMessage({ request: "frd" }, (response) => {
@@ -54,7 +54,7 @@ function sync_up_user(){
   })
 }
 
-// front
+// ------------ front ------------ //
 function visual_save(){
   $("#savethisfready").addClass("inactive")
   $("#savethisfready").html(`SAVED`)
@@ -136,25 +136,7 @@ function showhide(){
   }
 }
 
-// when loaded run this
-sync_up_user()
-$(ui).insertAfter(document.body)
-request_new_frd()
-
-$("#fready_ui")
-  .fadeTo(0, 0.5)
-  .css({ 'filter': 'saturate(0)' })
-  .slideUp(0)
-
-$("#readthisfready").click( () => {
-  readexit()
-})
-$("#savethisfready").click( () => {
-  saveunsave()
-})
-$(".freadyhide").click( () => {
-  showhide()
-})
+// ------------ listeners ------------ //
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
@@ -167,4 +149,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     load_frd(request.frd, request.cmd)
   }
   sendResponse('ok')
+})
+
+// ------------ onload ------------ //
+
+$(ui).insertAfter(document.body)
+request_new_frd()
+
+$("#fready_ui")
+  .fadeTo(0, 0.5)
+  .css({ 'filter': 'saturate(0)' })
+  .slideUp(0)
+
+$("#readthisfready").click(() => {
+  readexit()
+})
+$("#savethisfready").click(() => {
+  saveunsave()
+})
+$(".freadyhide").click(() => {
+  showhide()
 })

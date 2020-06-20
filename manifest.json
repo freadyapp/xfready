@@ -4,7 +4,6 @@
     "description": "Chill when reading from a screen",
     "permissions": [
       "activeTab",
-      "declarativeContent",
       "storage",
       "tabs"
     ],
