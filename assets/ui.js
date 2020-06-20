@@ -15,7 +15,6 @@ const expand_less = `
 </svg>
 `
 const ui = `
-
 <fready>
   <fready-block class='fready_div' id='fready_ui'>
     <a href='${FREADY_API}' target="_blank"><fready-icon id="fready_home">${home}</fready-icon></a>

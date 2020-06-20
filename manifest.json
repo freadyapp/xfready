@@ -1,15 +1,12 @@
   {
     "name": "Fready",
-    "version": "0.0.5",
+    "version": "0.0.2",
     "description": "Chill when reading from a screen",
     "permissions": [
-      "https://www.fready.co/*",
-      "http://localhost:3000/*",
       "activeTab",
       "declarativeContent",
       "storage",
-      "tabs",
-      "notifications"
+      "tabs"
     ],
     "background": {
       "scripts": [
@@ -37,7 +34,6 @@
       }
     ],
     "browser_action": {
-      // "default_popup": "popup.html",
       "default_icon": {
         "16": "assets/logos/fready_logo_16.png",
         "32": "assets/logos/fready_logo_32.png",

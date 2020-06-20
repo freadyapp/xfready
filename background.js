@@ -1,5 +1,9 @@
+// ------------ lets vars consts ------------ //
+
 let x = null
 let u = null
+
+// ------------ classes ------------ //
 
 class xFreadyUser{
   constructor(){
@@ -47,11 +51,9 @@ class xFreadyController{
     u.sync()
     if (flush) this.freadies = {}
   }
-
   get api_key(){
     return u.api_key
   }
-  
   serve_view(tab_id, url){
     log(`serving view for tab #${tab_id} and url -> ${url}`)
     if (url in this.freadies) { this.freadies[url].add_tab(tab_id); return this.freadies[url] }
@@ -59,7 +61,6 @@ class xFreadyController{
     table(this.freadies)
     return this.freadies[url]
   }
-
   remove_view(tab_id) {
     table(`request to remove ${tab_id}`, this.freadies)
     Object.entries(this.freadies).forEach(([url, fready]) => {
@@ -69,7 +70,6 @@ class xFreadyController{
       }
     })
   }
-
   remove_fready(url){
     if (url in this.freadies) delete this.freadies[url]
   }
@@ -82,7 +82,6 @@ class Fready {
     this.fetched = false
     this.load()
   }
-
   get api_key() {
     return x.api_key
   }
@@ -226,6 +225,8 @@ class Fready {
   }
 }
 
+
+// ------------ listeners ------------ //
 chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
@@ -256,8 +257,7 @@ chrome.runtime.onMessage.addListener(
     if (request.request == "user"){
       sendResponse({ 'status': "complete "})
     }
-});
-
+})
 chrome.browserAction.onClicked.addListener(tab => {
   u.sync()
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -268,25 +268,15 @@ chrome.browserAction.onClicked.addListener(tab => {
 })
 
 
-u = new xFreadyUser
-x = new xFreadyController
-
-
-chrome.runtime.onInstalled.addListener(function () {
-  // chrome.contextMenus.create({
-  //   "id": "sampleContextMenu",
-  //   "title": "Sample Context Menu",
-  //   "contexts": ["selection"]
-  // });
+// ------------ one time things ------------ //
+chrome.runtime.onInstalled.addListener(() => {
   log('FREADY-HAS-BEEN-INSTALLED!')
-
-  // chrome.notifications.create('fready_log_in', {
-  //   type: 'basic',
-  //   iconUrl: 'assets/logos/fready_logo_128.png',
-  //   title: 'Fready has been downloaded!',
-  //   message: 'You are not logged in. Click me to log in!'
-  // }, (notificationId) => { log(notificationId) });
   chrome.tabs.create({
     url: `${FREADY_API}/welcome`
-  });
-});
+  })
+})
+
+
+// ------------ start the script ------------ //
+u = new xFreadyUser
+x = new xFreadyController
