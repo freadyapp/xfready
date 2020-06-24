@@ -258,10 +258,15 @@ chrome.runtime.onMessage.addListener(
       sendResponse({ 'status': "complete "})
     }
 })
+
 chrome.browserAction.onClicked.addListener(tab => {
   u.sync()
-  log(x.freadies[tab.url])
-  x.freadies[tab.url].check_if_saved()
+  if (x.freadies[tab.url]){
+    log(x.freadies[tab.url])
+    x.freadies[tab.url].check_if_saved()
+  }else{
+    log('xfready doesnt exist for tab')
+  }
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, (response) => {
       if (response) table(response)
@@ -271,6 +276,7 @@ chrome.browserAction.onClicked.addListener(tab => {
 
 
 // ------------ one time things ------------ //
+
 chrome.runtime.onInstalled.addListener(() => {
   log('FREADY-HAS-BEEN-INSTALLED!')
   chrome.tabs.create({

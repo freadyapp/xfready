@@ -1,9 +1,8 @@
   {
     "name": "Fready",
     "version": "0.0.2",
-    "description": "Chill when reading from a screen",
+    "description": "Spend less time reading articles.",
     "permissions": [
-      "activeTab",
       "storage",
       "tabs"
     ],
