@@ -9,7 +9,7 @@ var minifyy = require('html-minifier-terser').minify
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
-function calc_eta(){
+function calc_words(){
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
 function cleanup(html){
@@ -23,7 +23,7 @@ function slurp_body(){
 // ------------ talking with background ------------ //
 function request_new_frd() {
   log('requesting new frd')
-  chrome.runtime.sendMessage({ request: "frd" }, (response) => {
+    chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
     table(response)
   })
 }
@@ -45,7 +45,7 @@ function request_read() {
 }
 
 function update_eta(){
-  chrome.runtime.sendMessage( { request: 'eta', eta: calc_eta()})
+  chrome.runtime.sendMessage( { request: 'eta', eta: calc_words() })
 }
 
 function perform_save() {
@@ -168,14 +168,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     table(request)
     load_frd(request.frd, request.cmd)
   }
-  sendResponse('ok')
+  if (request.eta){
+    log('sending eta to background script')
+    return sendResponse(10)
+  }
+  return sendResponse('ok')
 })
 
 // ------------ onload ------------ //
 
 $(ui).insertAfter(document.body)
 request_new_frd()
-update_eta()
+// update_eta()
 
 $("#fready_ui")
   .fadeTo(0, 0.5)

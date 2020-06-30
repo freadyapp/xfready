@@ -56,8 +56,13 @@ class xFreadyController{
   }
   serve_view(tab_id, url){
     log(`serving view for tab #${tab_id} and url -> ${url}`)
-    if (url in this.freadies) { this.freadies[url].add_tab(tab_id); return this.freadies[url] }
+    if (this.freadies[url]) { 
+      this.freadies[url].add_tab(tab_id)
+      // this.freadies[url].activate()
+      return this.freadies[url] 
+    }
     this.freadies[url] = new Fready(url, tab_id)
+    // this.freadies[url].activate()
     table(this.freadies)
     return this.freadies[url]
   }
@@ -79,7 +84,7 @@ class Fready {
   constructor(url, tab){
     this.url = decodeURIComponent(url)
     this.tabs = [tab]
-    this.fetched = false
+    this.fetched = true
     this.load()
   }
   get api_key() {
@@ -97,46 +102,18 @@ class Fready {
     if (this.tabs.indexOf(tab) > -1) this.tabs.splice(this.tabs.indexOf(tab), 1)
     if (this.tabs.length == 0) this.self_destruct()
   }
-  activate() {
-    this.render_badge('.')
-    if (this.fetched) {
-      if (this.data['eta'] > 0) {
-        this.render_badge(`${this.data['eta']}'`)
-        this.send()
-      }
-      else {
-        this.render_badge('')
-      }
-    }
-  }
+
   load(){
     this.check_if_saved()
     if (check_url(this.url)){
-      this.fetch()
+      // this.fetch()
     }else{
       this.fetched = true
       this.data = { 'eta': 0 }
-      this.activate()
+      // this.activate()
     }
   }
-  fetch() {
-    this.fetched = false
 
-    // $.ajax({
-    //   url: `${FREADY_API}/xapi/preview?loc=${this.url}&api_key=${this.api_key}`,
-    //   type: 'GET',
-    //   crossDomain: true,
-    //   success: (data) => {
-    //     this.data = data
-    //   },
-    //   error: (data) => {
-    //     this.data = { 'eta': 0 }
-    //   }
-    // }).then(() => {
-    //   this.fetched = true
-    //   this.activate()
-    // })
-  }
   update(url){
     this.url = url
     this.load()
@@ -198,6 +175,14 @@ class Fready {
       chrome.browserAction.setBadgeText({ text: txt.toString(), tabId: tab })
     })
   }
+
+  update_eta(chars){
+    log(`updating eta badge for tab with url ${this.url}, with ${chars} characters.`)
+    let mins = (Math.round(chars / JSON.parse(u.prefs)['wpm']))
+    this.render_badge(Math.round(mins).toString() + "'")
+    return mins
+  }
+
   check_if_saved(){
     log(`checking if url is saved [ ${this.url} ]`)
     $.ajax({
@@ -235,12 +220,24 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
 
+chrome.tabs.onActivated.addListener( (tab) =>{
+  table(tab)
+  chrome.tabs.executeScript({
+    file: 'injector.js'
+  })
+  chrome.tabs.get(tab.tabId, (data)=>{
+    log(data.url)
+    x.serve_view(tab.tabId, data.url)
+  })
+})
+
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     table(request)
-    if (request.request == "frd"){
+    if (request.frd){
       frd = x.serve_view(sender.tab.id, sender.tab.url)
-      frd.activate()
+      // frd.activate()
+      frd.update_eta(request.frd.eta)
       sendResponse({ msg: "ok" })
     }
     if (request.request == "save"){
@@ -260,7 +257,7 @@ chrome.runtime.onMessage.addListener(
     }
     if (request.request == 'eta'){
       log('updating the badge for tab')
-      x.freadies[sender.tab.url].render_badge(Math.round(request.eta/JSON.parse(u.prefs)['wpm']).toString() + "'")
+      x.freadies[sender.tab.url].update_eta(request.eta)
       sendResponse({ 'msg': 'thanks'})
     }
     if (request.request == "user"){
