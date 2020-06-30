@@ -121,20 +121,21 @@ class Fready {
   }
   fetch() {
     this.fetched = false
-    $.ajax({
-      url: `${FREADY_API}/xapi/preview?loc=${this.url}&api_key=${this.api_key}`,
-      type: 'GET',
-      crossDomain: true,
-      success: (data) => {
-        this.data = data
-      },
-      error: (data) => {
-        this.data = { 'eta': 0 }
-      }
-    }).then(() => {
-      this.fetched = true
-      this.activate()
-    })
+
+    // $.ajax({
+    //   url: `${FREADY_API}/xapi/preview?loc=${this.url}&api_key=${this.api_key}`,
+    //   type: 'GET',
+    //   crossDomain: true,
+    //   success: (data) => {
+    //     this.data = data
+    //   },
+    //   error: (data) => {
+    //     this.data = { 'eta': 0 }
+    //   }
+    // }).then(() => {
+    //   this.fetched = true
+    //   this.activate()
+    // })
   }
   update(url){
     this.url = url
@@ -194,7 +195,7 @@ class Fready {
   render_badge(txt){
     this.tabs.forEach(tab => {
       chrome.browserAction.enable(this.tab)
-      chrome.browserAction.setBadgeText({ text: txt, tabId: tab })
+      chrome.browserAction.setBadgeText({ text: txt.toString(), tabId: tab })
     })
   }
   check_if_saved(){
@@ -256,6 +257,11 @@ chrome.runtime.onMessage.addListener(
       log('request to unsave')
       x.freadies[sender.tab.url].unsave()
       sendResponse({ 'status': "complete "})
+    }
+    if (request.request == 'eta'){
+      log('updating the badge for tab')
+      x.freadies[sender.tab.url].render_badge(Math.round(request.eta/JSON.parse(u.prefs)['wpm']).toString() + "'")
+      sendResponse({ 'msg': 'thanks'})
     }
     if (request.request == "user"){
       sendResponse({ 'status': "complete "})

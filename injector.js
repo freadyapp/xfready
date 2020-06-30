@@ -4,15 +4,21 @@ let frame = $(`<lector></lector>`)
 let read = false
 let saved = false
 let show = false
-var minify = require('html-minifier-terser').minify
+var minifyy = require('html-minifier-terser').minify
 
-function slurp_body(){
-  return minify($(document.body).html().toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
-  return minify($(document.body).html().toString(), {
-    removeAttributeQuotes: true,
-    removeComments: true
-  })
+function minify(html){
+  return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
+function calc_eta(){
+  return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
+}
+function cleanup(html){
+  return minify(new Readability(document.cloneNode(true)).parse().content)
+}
+function slurp_body(){
+  return $(document.body).html()
+}
+
 
 // ------------ talking with background ------------ //
 function request_new_frd() {
@@ -26,14 +32,20 @@ function request(request_str){
   log('sending the request for new frd')
   // log(minify('<p title="blah" id="moo">foo</p>', {
   // }))
-  chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
+  chrome.runtime.sendMessage({ request: request_str, html: cleanup(slurp_body())}, (response) => {
     log(response)
   })
 }
 function request_read() {
   log('requesting read frd')
-  table(slurp_body().toString())
+  // table(slurp_body())
+  // log('trying to use readbility')
+  // log(minify((new Readability(document.).parse().title)))
   request("read")
+}
+
+function update_eta(){
+  chrome.runtime.sendMessage( { request: 'eta', eta: calc_eta()})
 }
 
 function perform_save() {
@@ -163,6 +175,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 $(ui).insertAfter(document.body)
 request_new_frd()
+update_eta()
 
 $("#fready_ui")
   .fadeTo(0, 0.5)

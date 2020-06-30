@@ -13,7 +13,7 @@
         "dev.js",
         "background.js"
       ],
-      "persistent": false
+      "persistent": true
     },
     "content_scripts": [
       {
@@ -23,6 +23,7 @@
         "js": [
           "third_party/jquery.min.js",
           "third_party/minihtml.min.js",
+          "third_party/readability.js",
           "dev.js",
           "assets/ui.js",
           "injector.js"
