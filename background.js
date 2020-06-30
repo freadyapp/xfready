@@ -89,6 +89,7 @@ class Fready {
     x.remove_fready(this.url)
   }
   add_tab(tab) {
+    console.log(`adding new tab [${tab}] in ${this.url}`)
     this.check_if_saved()
     if (!(tab in this.tabs)) this.tabs.push(tab)
   }
@@ -197,12 +198,14 @@ class Fready {
     })
   }
   check_if_saved(){
+    log(`checking if url is saved [ ${this.url} ]`)
     $.ajax({
       url: `${FREADY_API}/save_link?loc=${this.url}&api_key=${this.api_key}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
         this.saved = data != null
+        log(this.saved ? 'it is saved :>' : 'its not :c')
         this.id = this.saved ? data['id'] : 0
         log(`this id is ${this.id}`)
       },

@@ -4,9 +4,14 @@ let frame = $(`<lector></lector>`)
 let read = false
 let saved = false
 let show = false
+var minify = require('html-minifier-terser').minify
 
 function slurp_body(){
-  return $(document.body).html()
+  return minify($(document.body).html().toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
+  return minify($(document.body).html().toString(), {
+    removeAttributeQuotes: true,
+    removeComments: true
+  })
 }
 
 // ------------ talking with background ------------ //
@@ -18,13 +23,16 @@ function request_new_frd() {
 }
 
 function request(request_str){
+  log('sending the request for new frd')
+  // log(minify('<p title="blah" id="moo">foo</p>', {
+  // }))
   chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
     log(response)
   })
 }
 function request_read() {
   log('requesting read frd')
-  table(slurp_body())
+  table(slurp_body().toString())
   request("read")
 }
 

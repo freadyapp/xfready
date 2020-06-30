@@ -22,6 +22,7 @@
         ],
         "js": [
           "third_party/jquery.min.js",
+          "third_party/minihtml.min.js",
           "dev.js",
           "assets/ui.js",
           "injector.js"
