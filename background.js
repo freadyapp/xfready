@@ -186,9 +186,15 @@ class Fready {
       type: 'GET',
       crossDomain: true,
       success: (data) => {
-        this.saved = data.saved
-        this.id = data.id
-        log(`[ ${this.url} ] -> ${this.saved ? `is saved by the user` : `is NOT saved by the user`} [ ID => ${this.id} ]`)
+        if (data != null){
+          this.saved = data.saved
+          this.id = data.id
+          log(`[ ${this.url} ] -> ${this.saved ? `is saved by the user` : `is NOT saved by the user`} [ ID => ${this.id} ]`)
+        }else{
+          this.saved = false
+          this.id = null
+          log(`[ article got yeeted, reseting ] - [ ID => ${this.id} ]`)
+        }
       },
       error: (data) => {
         table('error checking if the article is loaded', data)
