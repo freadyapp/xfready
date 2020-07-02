@@ -14,6 +14,7 @@ function calc_words(){
 }
 function cleanup(html){
   // TODO fix this shit
+  return html
   return minify(new Readability(document.cloneNode(true)).parse().content)
 }
 function slurp_body(){
@@ -32,7 +33,7 @@ function request(request_str){
   log('sending the request for new frd')
   // log(minify('<p title="blah" id="moo">foo</p>', {
   // }))
-  chrome.runtime.sendMessage({ request: request_str, html: cleanup(slurp_body())}, (response) => {
+  chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
   })
 }
 function request_read() {
@@ -169,7 +170,7 @@ function cleanup(){
 // ------------ listeners ------------ //
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // if (request.trigger == "click") showhide()
+  if (request.trigger == "click") showhide()
   if (request.user){
     sync_up_user(request.user)
   }

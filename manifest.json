@@ -4,14 +4,9 @@
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
-      "activeTab"
-    ],
-    "externally_connectable": {
-      "matches": [
-        "https://www.fready.co/*",
+      "activeTab",
         "http://localhost:3000/*"
-      ]
-    },
+    ],
     "background": {
       "scripts": [
         "third_party/jquery.min.js",

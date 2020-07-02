@@ -178,16 +178,16 @@ class Fready {
     return mins
   }
 
-  check_if_saved(){
+  reload(){
     // TODO fix this shit lmao
     // log(`checking if url is saved [ ${this.url} ]`)
     $.ajax({
-      url: `${FREADY_API}/save_link?loc=${this.url}&api_key=${this.api_key}`,
+      url: `${FREADY_API}/find_link?api_key=${this.api_key}&loc=${this.url}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
-        this.saved = data != null
-        this.id = this.saved ? data['id'] : null
+        this.saved = data.saved
+        this.id = data.id
         log(`[ ${this.url} ] -> ${this.saved ? `is saved by the user` : `is NOT saved by the user`} [ ID => ${this.id} ]`)
       },
       error: (data) => {
@@ -274,15 +274,28 @@ chrome.runtime.onMessage.addListener(
 
 chrome.browserAction.onClicked.addListener(tab => {
   log(`xfready icon was clicked on ${tab.id} (${tab.url}), syncing user`)
-  if (x.check_if_fready_(tab.id, tab.url)){
-    log(`NOT injecting JS`)
-  }else{
-    log(`INJECTING JS 💉`)
-    inject(tab)
-  }
   u.sync()
+
+  chrome.tabs.query({ active: true, currentWindow: true }, () => {
+    chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
+      if (response) {
+        log(`we're gooooooooood --{ ${tab.id} }--`)
+      } else {
+        log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
+        inject(tab)
+      }
+    })
+  })
+
+  // if (x.check_if_fready_(tab.id, tab.url)){
+  //   log(`NOT injecting JS`)
+  // }else{
+  //   log(`INJECTING JS 💉`)
+  //   inject(tab)
+  // }
+
   let fr = x.serve_fready(tab.id, tab.url)
-  fr.check_if_saved()
+  fr.reload()
 })
 
 // ------------ one time things ------------ //
