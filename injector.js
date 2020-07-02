@@ -3,7 +3,7 @@ let frd = null
 let frame = $(`<lector></lector>`)
 let read = false
 let saved = false
-let show = false
+let show = POPUP_DEFAULT
 var minifyy = require('html-minifier-terser').minify
 
 function minify(html){
@@ -13,6 +13,7 @@ function calc_words(){
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
 function cleanup(html){
+  // TODO fix this shit
   return minify(new Readability(document.cloneNode(true)).parse().content)
 }
 function slurp_body(){
@@ -24,7 +25,6 @@ function slurp_body(){
 function request_new_frd() {
   log('requesting new frd')
     chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
-    table(response)
   })
 }
 
@@ -33,7 +33,6 @@ function request(request_str){
   // log(minify('<p title="blah" id="moo">foo</p>', {
   // }))
   chrome.runtime.sendMessage({ request: request_str, html: cleanup(slurp_body())}, (response) => {
-    log(response)
   })
 }
 function request_read() {
@@ -56,7 +55,6 @@ function perform_save() {
 
 function perform_unsave() {
   chrome.runtime.sendMessage({ request: "unsave" }, (response) => {
-    log(response)
   })
 }
 
@@ -85,6 +83,8 @@ function visual_unsave(){
 }
 
 function load_frd(local_frd, cmd=null){
+  if (local_frd != null && user != null){
+
   frd = local_frd
   table('loading new frd')
   table(frd)
@@ -104,7 +104,10 @@ function load_frd(local_frd, cmd=null){
     visual_unsave()
     saved = false
   }
-
+    return local_frd
+  }else{
+    return null
+  }
 }
 
 function readexit(pop=false){
@@ -156,16 +159,22 @@ function showhide(){
   }
 }
 
+
+function cleanup(){
+  $('fready').remove()
+  $('lector').remove()
+  $(document.body).fadeIn()
+}
+
 // ------------ listeners ------------ //
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.trigger == "click") showhide()
+  // if (request.trigger == "click") showhide()
   if (request.user){
     sync_up_user(request.user)
   }
   if (request.frd){
-    log('updating frd')
-    table(request)
+    log(`updating FRD [ ${request.frd} ] - [ ${request.cmd} ]`)
     load_frd(request.frd, request.cmd)
   }
   if (request.eta){
@@ -177,14 +186,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // ------------ onload ------------ //
 
+
+cleanup() // clean up before starting a new instance
+sync_up_user() // sync up with local user before triggering any functions
+
 $(ui).insertAfter(document.body)
 request_new_frd()
 // update_eta()
 
-$("#fready_ui")
+if (!show){
+  $("#fready_ui")
   .fadeTo(0, 0.5)
   .css({ 'filter': 'saturate(0)' })
   .slideUp(0)
+}
 
 $("#readthisfready").click(() => {
   readexit()

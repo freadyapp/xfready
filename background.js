@@ -1,10 +1,8 @@
 // ------------ lets vars consts ------------ //
-
 let x = null
 let u = null
 
 // ------------ classes ------------ //
-
 class xFreadyUser{
   constructor(){
     this.sync()
@@ -55,6 +53,10 @@ class xFreadyController{
   get api_key(){
     return u.api_key
   }
+  check_if_fready_(tab_id, url){
+    // log(`LOG for CHECK IF FREADY: \n [ check url ( ${url} ) ]-> [${this.freadies[url]}] [ check tab ( ${tab_id} )]`)
+    return this.freadies[url] != null && this.freadies[url].tabs.includes(tab_id)
+  }
   serve_fready(tab_id, url){
     log(`serving view for tab #${tab_id} and url -> ${url}`)
     if (this.freadies[url]) { 
@@ -83,7 +85,6 @@ class Fready {
   constructor(url, tab){
     this.url = decodeURIComponent(url)
     this.tabs = [tab]
-    this.load()
   }
   get api_key() {
     return x.api_key
@@ -101,24 +102,16 @@ class Fready {
       log(`tab ${tab} is already linked with ${this.url}`)
     }
   }
+
   remove_tab(tab){
     if (this.tabs.indexOf(tab) > -1) this.tabs.splice(this.tabs.indexOf(tab), 1)
     if (this.tabs.length == 0) this.self_destruct()
   }
 
-  load(){
-    // TODO deprecate
-    this.check_if_saved()
-    if (check_url(this.url)){
-    }else{
-      this.data = { 'eta': 0 }
-    }
-  }
-
   update(url){
     this.url = url
-    this.load()
   }
+
   read(doc){
     if (this.saved){
       this.send('read')
@@ -130,6 +123,7 @@ class Fready {
       ), false)
     }
   }
+
   save(doc, cb = (() => { this.send() }), hard_save = true){
     this.saved = hard_save
     $.ajax({
@@ -179,22 +173,22 @@ class Fready {
 
   update_eta(chars){
     log(`updating eta badge for tab with url ${this.url}, with ${chars} characters.`)
-    let mins = (Math.round(chars / JSON.parse(u.prefs)['wpm']))
+    let mins = (Math.round( chars / get_pref('wpm', DEF_PREF.wpm ) ))
     this.render_badge(Math.round(mins).toString() + "'")
     return mins
   }
 
   check_if_saved(){
-    log(`checking if url is saved [ ${this.url} ]`)
+    // TODO fix this shit lmao
+    // log(`checking if url is saved [ ${this.url} ]`)
     $.ajax({
       url: `${FREADY_API}/save_link?loc=${this.url}&api_key=${this.api_key}`,
       type: 'GET',
       crossDomain: true,
       success: (data) => {
         this.saved = data != null
-        log(this.saved ? 'it is saved :>' : 'its not :c')
-        this.id = this.saved ? data['id'] : 0
-        log(`this id is ${this.id}`)
+        this.id = this.saved ? data['id'] : null
+        log(`[ ${this.url} ] -> ${this.saved ? `is saved by the user` : `is NOT saved by the user`} [ ID => ${this.id} ]`)
       },
       error: (data) => {
         table('error checking if the article is loaded', data)
@@ -205,6 +199,7 @@ class Fready {
     })
   }
   send(command=null){
+    
     this.tabs.forEach( (tab)=>{
       chrome.tabs.sendMessage(tab, { frd: this, cmd: command }, (response) => {
         if (response) table(response)
@@ -216,75 +211,87 @@ class Fready {
 }
 
 
+function inject(tab){
+  chrome.tabs.insertCSS(tab.id, {
+    file: "injector.css"
+  })
+  let scripts = [
+    "third_party/jquery.min.js",
+    "third_party/minihtml.min.js",
+    "third_party/readability.js",
+    "dev.js",
+    "assets/ui.js",
+    "injector.js"
+  ]
+  scripts.forEach((script) => {
+    chrome.tabs.executeScript(tab.id, {
+      file: script
+    })
+  })
+}
+
+
 // ------------ listeners ------------ //
 chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
 
 // chrome.tabs.onActivated.addListener( (tab) =>{
-//   table(tab)
-//   chrome.tabs.get(tab.tabId, (data)=>{
-//     log(data.url)
-//     x.serve_fready(tab.tabId, data.url)
-//   })
+//   log(`injecting js into tab with id ${tab}`)
+//   inject(tab)
 // })
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     table(request)
     if (request.frd){
+      log(`request to create/update ${sender.tab.url}`)
       frd = x.serve_fready(sender.tab.id, sender.tab.url)
       frd.update_eta(request.frd.eta)
-      sendResponse({ msg: "ok" })
+      sendResponse({ msg: "recieved frd" })
     }
     if (request.request == "save"){
-      log('request to save')
+      log(`request to save ${sender.tab.url}`)
       x.freadies[sender.tab.url].save(request.html)
-      sendResponse({ 'status': "complete "})
+      sendResponse({ msg: "saved article"})
     }
     if (request.request == "read"){
-      log('request to read')
+      log(`request to read ${sender.tab.url}`)
       x.freadies[sender.tab.url].read(request.html)
-      sendResponse({ 'status': "ok "})
+      sendResponse({ msg: "reading article.."})
     }
     if (request.request == "unsave"){
-      log('request to unsave')
+      log(`request to unsave ${sender.tab.url}`)
       x.freadies[sender.tab.url].unsave()
-      sendResponse({ 'status': "complete "})
+      sendResponse({ msg: "unsaved article "})
     }
     if (request.request == 'eta'){
       log('updating the badge for tab')
       x.freadies[sender.tab.url].update_eta(request.eta)
-      sendResponse({ 'msg': 'thanks'})
-    }
-    if (request.request == "user"){
-      sendResponse({ 'status': "complete "})
+      sendResponse({ msg: 'thanks'})
     }
 })
 
 chrome.browserAction.onClicked.addListener(tab => {
   log(`xfready icon was clicked on ${tab.id} (${tab.url}), syncing user`)
+  if (x.check_if_fready_(tab.id, tab.url)){
+    log(`NOT injecting JS`)
+  }else{
+    log(`INJECTING JS 💉`)
+    inject(tab)
+  }
   u.sync()
-  // TODO check if current tab has been processed before
   let fr = x.serve_fready(tab.id, tab.url)
   fr.check_if_saved()
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
-      if (response) table(response)
-    })
-  })
 })
 
-
 // ------------ one time things ------------ //
-
 chrome.runtime.onInstalled.addListener(() => {
-  log('FREADY-HAS-BEEN-INSTALLED!')
+  log('!FREADY-HAS-BEEN-INSTALLED!')
   chrome.tabs.create({
     url: `${FREADY_API}/welcome`
   })
 })
-
 
 // ------------ start the script ------------ //
 u = new xFreadyUser

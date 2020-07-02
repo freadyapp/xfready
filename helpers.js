@@ -12,3 +12,7 @@ function check_url(url){
     }
   }))
 }
+
+function get_pref(pref, def){
+  return JSON.parse(u.prefs)[pref] ? JSON.parse(u.prefs)[pref] : def
+}

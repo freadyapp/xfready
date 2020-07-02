@@ -4,11 +4,12 @@
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
-      "tabs"
+      "activeTab"
     ],
     "externally_connectable": {
       "matches": [
-        "https://www.fready.co/*"
+        "https://www.fready.co/*",
+        "http://localhost:3000/*"
       ]
     },
     "background": {
@@ -20,24 +21,6 @@
       ],
       "persistent": true
     },
-    "content_scripts": [
-      {
-        "matches": [
-          "<all_urls>"
-        ],
-        "js": [
-          "third_party/jquery.min.js",
-          "third_party/minihtml.min.js",
-          "third_party/readability.js",
-          "dev.js",
-          "assets/ui.js",
-          "injector.js"
-        ],
-        "css": [
-          "injector.css"
-        ]
-      }
-    ],
     "browser_action": {
       "default_icon": {
         "16": "assets/logos/fready_logo_16.png",
