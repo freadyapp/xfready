@@ -27,12 +27,13 @@ class xFreadyUser{
       }
     }).then( () => {
       chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
-        table('updating', this)
+        table('syncing local user with live user', this)
       })
       this.sync_tabs()
     })
   }
   sync_tabs(){
+    // TODO deprecate
     Object.entries(x.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab, { user: this }, (response) => {
@@ -54,24 +55,22 @@ class xFreadyController{
   get api_key(){
     return u.api_key
   }
-  serve_view(tab_id, url){
+  serve_fready(tab_id, url){
     log(`serving view for tab #${tab_id} and url -> ${url}`)
     if (this.freadies[url]) { 
       this.freadies[url].add_tab(tab_id)
-      // this.freadies[url].activate()
-      return this.freadies[url] 
+      return this.freadies[url]
     }
+    log(`fready for ${url} didnt exist so creating a new one`)
     this.freadies[url] = new Fready(url, tab_id)
-    // this.freadies[url].activate()
-    table(this.freadies)
     return this.freadies[url]
   }
   remove_view(tab_id) {
-    table(`request to remove ${tab_id}`, this.freadies)
     Object.entries(this.freadies).forEach(([url, fready]) => {
       if (fready.tabs.includes(tab_id)) {
-        table('tab is on fready:', fready)
+        log(`removing tab(${tab_id}) from fready with this url: ${url}`)
         fready.remove_tab(tab_id)
+        return true
       }
     })
   }
@@ -84,7 +83,6 @@ class Fready {
   constructor(url, tab){
     this.url = decodeURIComponent(url)
     this.tabs = [tab]
-    this.fetched = true
     this.load()
   }
   get api_key() {
@@ -94,9 +92,14 @@ class Fready {
     x.remove_fready(this.url)
   }
   add_tab(tab) {
-    console.log(`adding new tab [${tab}] in ${this.url}`)
-    this.check_if_saved()
-    if (!(tab in this.tabs)) this.tabs.push(tab)
+
+    if (!(this.tabs.includes(tab))){
+      log(`adding new tab [${tab}] in ${this.url}`)
+      this.tabs.push(tab)
+      log(`[${this.url}] -> ${this.tabs}`)
+    }else{
+      log(`tab ${tab} is already linked with ${this.url}`)
+    }
   }
   remove_tab(tab){
     if (this.tabs.indexOf(tab) > -1) this.tabs.splice(this.tabs.indexOf(tab), 1)
@@ -104,13 +107,11 @@ class Fready {
   }
 
   load(){
+    // TODO deprecate
     this.check_if_saved()
     if (check_url(this.url)){
-      // this.fetch()
     }else{
-      this.fetched = true
       this.data = { 'eta': 0 }
-      // this.activate()
     }
   }
 
@@ -220,23 +221,19 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
 
-chrome.tabs.onActivated.addListener( (tab) =>{
-  table(tab)
-  chrome.tabs.executeScript({
-    file: 'injector.js'
-  })
-  chrome.tabs.get(tab.tabId, (data)=>{
-    log(data.url)
-    x.serve_view(tab.tabId, data.url)
-  })
-})
+// chrome.tabs.onActivated.addListener( (tab) =>{
+//   table(tab)
+//   chrome.tabs.get(tab.tabId, (data)=>{
+//     log(data.url)
+//     x.serve_fready(tab.tabId, data.url)
+//   })
+// })
 
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     table(request)
     if (request.frd){
-      frd = x.serve_view(sender.tab.id, sender.tab.url)
-      // frd.activate()
+      frd = x.serve_fready(sender.tab.id, sender.tab.url)
       frd.update_eta(request.frd.eta)
       sendResponse({ msg: "ok" })
     }
@@ -266,15 +263,13 @@ chrome.runtime.onMessage.addListener(
 })
 
 chrome.browserAction.onClicked.addListener(tab => {
+  log(`xfready icon was clicked on ${tab.id} (${tab.url}), syncing user`)
   u.sync()
-  if (x.freadies[tab.url]){
-    log(x.freadies[tab.url])
-    x.freadies[tab.url].check_if_saved()
-  }else{
-    log('xfready doesnt exist for tab')
-  }
+  // TODO check if current tab has been processed before
+  let fr = x.serve_fready(tab.id, tab.url)
+  fr.check_if_saved()
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, { trigger: "click" }, (response) => {
+    chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
       if (response) table(response)
     })
   })
