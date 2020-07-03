@@ -180,7 +180,6 @@ class Fready {
 
   reload(){
     // TODO fix this shit lmao
-    // log(`checking if url is saved [ ${this.url} ]`)
     $.ajax({
       url: `${FREADY_API}/find_link?api_key=${this.api_key}&loc=${this.url}`,
       type: 'GET',
@@ -205,12 +204,11 @@ class Fready {
     })
   }
   send(command=null){
-    
     this.tabs.forEach( (tab)=>{
       chrome.tabs.sendMessage(tab, { frd: this, cmd: command }, (response) => {
         if (response) table(response)
-        log('sent to the view')
         table(this)
+        log('sent to the view')
       })
     })
   }
@@ -254,6 +252,7 @@ chrome.runtime.onMessage.addListener(
       log(`request to create/update ${sender.tab.url}`)
       frd = x.serve_fready(sender.tab.id, sender.tab.url)
       frd.update_eta(request.frd.eta)
+      frd.reload()
       sendResponse({ msg: "recieved frd" })
     }
     if (request.request == "save"){
@@ -285,23 +284,16 @@ chrome.browserAction.onClicked.addListener(tab => {
   chrome.tabs.query({ active: true, currentWindow: true }, () => {
     chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
       if (response) {
-        log(`we're gooooooooood --{ ${tab.id} }--`)
+        log(`we're good, js has already been ejected --{ ${tab.id} }--`)
+        let fr = x.serve_fready(tab.id, tab.url)
+        fr.reload()
       } else {
         log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
         inject(tab)
       }
+      // after making sure we have a recieving end run this
     })
   })
-
-  // if (x.check_if_fready_(tab.id, tab.url)){
-  //   log(`NOT injecting JS`)
-  // }else{
-  //   log(`INJECTING JS 💉`)
-  //   inject(tab)
-  // }
-
-  let fr = x.serve_fready(tab.id, tab.url)
-  fr.reload()
 })
 
 // ------------ one time things ------------ //

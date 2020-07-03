@@ -84,27 +84,30 @@ function visual_unsave(){
 }
 
 function load_frd(local_frd, cmd=null){
-  if (local_frd != null && user != null){
-
-  frd = local_frd
-  table('loading new frd')
+  log(`loading FRD [ ${local_frd != null ? "niada" : local_frd} ] - [ ${cmd} ]`)
   table(frd)
-  $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
-  
-  if (cmd != null && cmd == 'read') {
-    log('i need to read')
-    $(document.body).fadeTo(200, 1)
-    read = false
-    readexit(true)
-  }
 
-  if (local_frd.saved){
-    visual_save()
-    saved = true
-  }else{
-    visual_unsave()
-    saved = false
-  }
+  if (local_frd != null && user != null){
+    frd = local_frd
+    $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+    
+    if (cmd != null && cmd == 'read') {
+      log('i need to read')
+      $(document.body).fadeTo(200, 1)
+      read = false
+      readexit(true)
+    }else{
+      read = true
+      readexit(false)
+    }
+
+    if (local_frd.saved){
+      visual_save()
+      saved = true
+    }else{
+      visual_unsave()
+      saved = false
+    }
     return local_frd
   }else{
     return null
@@ -175,7 +178,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sync_up_user(request.user)
   }
   if (request.frd){
-    log(`updating FRD [ ${request.frd} ] - [ ${request.cmd} ]`)
     load_frd(request.frd, request.cmd)
   }
   if (request.eta){
