@@ -13,7 +13,6 @@ function calc_words(){
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
 function cleanup(html){
-  // TODO fix this shit
   return html
   return minify(new Readability(document.cloneNode(true)).parse().content)
 }
@@ -31,8 +30,6 @@ function request_new_frd() {
 
 function request(request_str){
   log('sending the request for new frd')
-  // log(minify('<p title="blah" id="moo">foo</p>', {
-  // }))
   chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
   })
 }

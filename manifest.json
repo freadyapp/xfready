@@ -5,7 +5,7 @@
     "permissions": [
       "storage",
       "activeTab",
-        "http://localhost:3000/*"
+      "https://www.fready.co/*"
     ],
     "background": {
       "scripts": [

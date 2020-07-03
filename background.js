@@ -31,7 +31,6 @@ class xFreadyUser{
     })
   }
   sync_tabs(){
-    // TODO deprecate
     Object.entries(x.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab, { user: this }, (response) => {
@@ -54,7 +53,6 @@ class xFreadyController{
     return u.api_key
   }
   check_if_fready_(tab_id, url){
-    // log(`LOG for CHECK IF FREADY: \n [ check url ( ${url} ) ]-> [${this.freadies[url]}] [ check tab ( ${tab_id} )]`)
     return this.freadies[url] != null && this.freadies[url].tabs.includes(tab_id)
   }
   serve_fready(tab_id, url){
@@ -179,7 +177,6 @@ class Fready {
   }
 
   reload(){
-    // TODO fix this shit lmao
     $.ajax({
       url: `${FREADY_API}/find_link?api_key=${this.api_key}&loc=${this.url}`,
       type: 'GET',
@@ -240,11 +237,6 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
   x.remove_view(tabId)
 })
 
-// chrome.tabs.onActivated.addListener( (tab) =>{
-//   log(`injecting js into tab with id ${tab}`)
-//   inject(tab)
-// })
-
 chrome.runtime.onMessage.addListener(
   (request, sender, sendResponse) => {
     table(request)
@@ -291,7 +283,6 @@ chrome.browserAction.onClicked.addListener(tab => {
         log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
         inject(tab)
       }
-      // after making sure we have a recieving end run this
     })
   })
 })
