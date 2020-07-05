@@ -4,8 +4,8 @@
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
-      "activeTab",
-      "https://www.fready.co/*"
+      "activeTab"
+      // "https://www.fready.co/*"
     ],
     "background": {
       "scripts": [

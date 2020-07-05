@@ -1,9 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap');
+
 fready-block{
   all: initial;
   user-select:none;
   transition: all .5 ease;
   /* display: none; */
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Inter', sans-serif !important;
   /* background: #2B6CCE;  */
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */ 
   border-radius: 10px 0px 7px 13px;
@@ -86,7 +88,7 @@ fready .exit{
 
 fready .meta{
   font-size: 8px;
-  font-family: 'Open Sans';
+  font-family: 'Inter';
   color: gray;
 }
 
