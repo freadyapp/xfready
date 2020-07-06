@@ -172,7 +172,7 @@ fready-block{
   backdrop-filter: blur(10px);
   margin: 20px;
   margin-top: 0;
-  background: rgba(247, 247, 247, 0.829);
+  background: #eceeee;
   box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
   text-align: center;
 
@@ -189,32 +189,29 @@ fready-button {
   font-family: Roboto;
   letter-spacing: 1.4px;
   background-color: #2B6CCE;
-  border: 2px solid rgb(38, 93, 182);
   border-radius: 4px;
-  box-shadow: -0px 0px 8px rgba(0, 0, 0, 0.15);
-  padding: 5px 10px;
+  box-shadow: -0px 0px 5px rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
   color: whitesmoke;
   cursor: pointer;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   /* line-height: 20px; */
 }
 
 fready-button:hover{
-  background-color: rgb(38, 92, 173);
-  border: 2px solid rgb(38, 93, 182);
-  box-shadow: -0px 0px 15px rgba(0, 0, 0, 0.20);
+  background-color: #2773e4;
+  box-shadow: -0px 0px 8px rgba(0, 0, 0, 0.30);
   color: white;
 }
 
 fready .ghost{
   background-color: #ececec !important;
   color: #404044;
-  border-color: #e4e4e4;
+
 }
 fready .ghost:hover{
-  background-color: rgb(116, 116, 116);
-  border-color: #e4e4e4 !important;
-  color: #404044;
+  background-color: rgb(255, 255, 255);
+  color: black;
 }
 
 fready .inline{
@@ -225,25 +222,22 @@ fready .inactive{
   background-color: transparent !important;
   box-shadow: none;
   color: gray !important;
-  border: 2px solid transparent;
 }
 
 fready .inactive:hover{
-  background-color: lightblue;
-  border: 2px solid rgb(141, 141, 141);
-  color: black;
+  color: #2B6CCE !important;
+  /* border: none !important; */
 }
 
 fready .exit{
   background-color: transparent;
   color: #2B6CCE;
-  border: 2px solid transparent;
 }
 
 fready .meta{
   font-size: 8px;
   font-family: 'Inter';
-  color: gray;
+  color: rgba(128, 128, 128, 0.63);
 }
 
 fready #freadyhidebutton{
@@ -279,6 +273,7 @@ fready #fready_home{
   margin-right: 3px !important;
   cursor: pointer;
 }
+
 
 fready-x{
   /* background-color: red; */
