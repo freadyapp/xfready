@@ -86,13 +86,16 @@ function load_frd(local_frd, cmd=null){
 
   if (local_frd != null && user != null){
     frd = local_frd
-    $(frame).html(`<iframe id="freadysscreen" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
-    
+    $(frame).html(`<iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+    // $(frame)[0].contentWindow.focus()
     if (cmd != null && cmd == 'read') {
       log('i need to read')
       $(document.body).fadeTo(200, 1)
       read = false
       readexit(true)
+      setTimeout(() => {
+        showhide()
+      }, 1000)
     }else{
       read = true
       readexit(false)
@@ -124,13 +127,20 @@ function readexit(pop=false){
       $(frame).fadeTo(200, 1)
     }else{
       request_read()
+      $("#readthisfready").addClass("exit")
+      $("#readthisfready").text(`EXIT`)
       $(document.body).fadeTo(200, 0.5)
     }
+    
+    setTimeout(() => {
+      $("fready-x").fadeIn()
+    }, 4000)
   }else{
     $("#readthisfready").removeClass("exit")
     $("#readthisfready").text(`READ`)
     $(document.body).fadeIn()
     $(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
+    $("fready-x").fadeOut()
   }
 }
 
@@ -210,3 +220,20 @@ $("#savethisfready").click(() => {
 $(".freadyhide").click(() => {
   showhide()
 })
+
+$("fready-x").click(() => {
+  readexit(true)
+})
+
+// idleTimer({
+//   callback: () => {
+//     $("fready-x").fadeOut(50)
+//     console.log('fading ouuttt')
+//   },
+//   activeCallback: () => {
+//     $("fready-x").fadeIn(50)
+//     console.log('fading in')
+//   },
+//   idleTime: 2000
+// })
+

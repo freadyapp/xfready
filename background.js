@@ -222,6 +222,7 @@ function inject(tab){
     "third_party/readability.js",
     "dev.js",
     "assets/ui.js",
+    "helpers.js",
     "injector.js"
   ]
   scripts.forEach((script) => {
