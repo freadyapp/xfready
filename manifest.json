@@ -1,12 +1,11 @@
   {
     "name": "Fready",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
       "activeTab",
       "https://www.fready.co/*"
-      ,"http://localhost:3000/*"
     ],
     "background": {
       "scripts": [
