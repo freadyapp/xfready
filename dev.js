@@ -1,4 +1,4 @@
-const DEVELOPMENT = false
+const DEVELOPMENT = true
 const FREADY_API = DEVELOPMENT ? "http://localhost:3000" : "https://www.fready.co"
 
 const POPUP_DEFAULT = true // if true popup will trigger with one click

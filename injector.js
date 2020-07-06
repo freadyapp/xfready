@@ -12,19 +12,19 @@ function minify(html){
 function calc_words(){
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
-function cleanup(html){
-  return html
-  return minify(new Readability(document.cloneNode(true)).parse().content)
-}
+
 function slurp_body(){
+  return minify(new Readability(document.cloneNode(true)).parse().content)
   return $(document.body).html()
 }
-
+function w_body(){
+  
+}
 
 // ------------ talking with background ------------ //
 function request_new_frd() {
   log('requesting new frd')
-    chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
+  chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
   })
 }
 
