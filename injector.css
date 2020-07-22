@@ -132,7 +132,11 @@ fready #fready_home{
 
 
 fready-x{
+  box-sizing: content-box !important;
+  user-select:none;
+
   /* background-color: red; */
+  background-color: #404040;
   width: 25px;
   height: 25px;
   position: fixed;
@@ -140,17 +144,21 @@ fready-x{
   top: 30px;
   z-index: 999999999999999;
   border-radius: 10000px;
-  opacity: .3;
+  opacity: .25;
   padding: 10px;
   box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.15);
   cursor: pointer;
 }
 fready-x:hover{
-  opacity: .4;
+  opacity: .8;
   box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
 }
-svg{
+
+
+fready-x svg{
   vertical-align: baseline;
+  height: 100%;
+  width: 100%;
 }
 /* 
 svg {
