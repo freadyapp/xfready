@@ -1,6 +1,6 @@
   {
     "name": "Fready",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
@@ -23,8 +23,7 @@
         "48": "assets/logos/fready_logo_48.png",
         "64": "assets/logos/fready_logo_64.png",
         "128": "assets/logos/fready_logo_128.png",
-        "256": "assets/logos/fready_logo_256.png",
-        "512": "assets/logos/fready_logo_512.png"
+        "256": "assets/logos/fready_logo_256.png"
       }
     },
     "commands": {
