@@ -72,11 +72,11 @@ function sync_up_user(){
 
 // ------------ front ------------ //
 function visual_save(){
-  $("#savethisfready").addClass("inactive")
+  $("#savethisfready").addClass("x-fready-inactive")
   $("#savethisfready").html(`SAVED`)
 }
 function visual_unsave(){
-  $("#savethisfready").removeClass("inactive")
+  $("#savethisfready").removeClass("x-fready-inactive")
   $("#savethisfready").html(`SAVE`)
 }
 
@@ -119,7 +119,7 @@ function readexit(pop=false){
   if (frd !=null && read){
     table(frd)
     if (pop){
-      $("#readthisfready").addClass("exit")
+      $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
       $(frame).insertAfter(document.body)
       $(document.body).fadeOut()
@@ -127,7 +127,7 @@ function readexit(pop=false){
       $(frame).fadeTo(200, 1)
     }else{
       request_read()
-      $("#readthisfready").addClass("exit")
+      $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
       $(document.body).fadeTo(200, 0.5)
     }
@@ -136,7 +136,7 @@ function readexit(pop=false){
       $("fready-x").fadeIn()
     }, 4000)
   }else{
-    $("#readthisfready").removeClass("exit")
+    $("#readthisfready").removeClass("x-fready-exit")
     $("#readthisfready").text(`READ`)
     $(document.body).fadeIn()
     $(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
