@@ -220,6 +220,7 @@ function inject(tab){
     "third_party/jquery.min.js",
     "third_party/minihtml.min.js",
     "third_party/readability.js",
+    "third_party/readable.js",
     "dev.js",
     "assets/ui.js",
     "helpers.js",

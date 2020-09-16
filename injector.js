@@ -9,6 +9,9 @@ var minifyy = require('html-minifier-terser').minify
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
+function is_readable_(doc){
+  return isProbablyReaderable(doc)
+}
 function calc_words(){
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
@@ -35,9 +38,6 @@ function request(request_str){
 }
 function request_read() {
   log('requesting read frd')
-  // table(slurp_body())
-  // log('trying to use readbility')
-  // log(minify((new Readability(document.).parse().title)))
   request("read")
 }
 
@@ -129,6 +129,7 @@ function readexit(pop=false){
       request_read()
       $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
+
       $(document.body).fadeTo(200, 0.5)
     }
     
@@ -225,15 +226,4 @@ $("fready-x").click(() => {
   readexit(true)
 })
 
-// idleTimer({
-//   callback: () => {
-//     $("fready-x").fadeOut(50)
-//     console.log('fading ouuttt')
-//   },
-//   activeCallback: () => {
-//     $("fready-x").fadeIn(50)
-//     console.log('fading in')
-//   },
-//   idleTime: 2000
-// })
-
+log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
