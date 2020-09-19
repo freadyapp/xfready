@@ -21,6 +21,7 @@ class xFreadyUser{
         this.api_key = data['key']
       },
       error: (e) => { 
+        console.log('Fready failed to sync with your account.')
         table('failed to sync user data', e)
       }
     }).then( () => {
@@ -125,7 +126,7 @@ class Fready {
   save(doc, cb = (() => { this.send() }), hard_save = true){
     this.saved = hard_save
     $.ajax({
-      url: `${FREADY_API}/links.json?api_key=${this.api_key}`,
+      url: `${FREADY_API}/links.json`,
       type: 'POST',
       crossDomain: true,
       dataType: 'text json',
@@ -154,10 +155,14 @@ class Fready {
   unsave(){
     this.saved = false
     $.ajax({
-      url: `${FREADY_API}/unsave_link?loc=${this.url}&api_key=${this.api_key}`,
+      url: `${FREADY_API}/unsave_link`,
       type: "GET",
       crossDomain: true,
-      error: (e) => { log(e) }
+      error: (e) => { log(e) },
+      data: {
+        "loc": this.url,
+        "api_key": this.api_key
+      }
     }).then(() => {
       this.send()
     })
@@ -178,9 +183,13 @@ class Fready {
 
   reload(){
     $.ajax({
-      url: `${FREADY_API}/find_link?api_key=${this.api_key}&loc=${this.url}`,
+      url: `${FREADY_API}/find_link`,
       type: 'GET',
       crossDomain: true,
+      data: {
+        "loc": this.url,
+        "api_key": this.api_key
+      },
       success: (data) => {
         if (data != null){
           this.saved = data.saved

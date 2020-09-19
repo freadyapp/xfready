@@ -207,6 +207,10 @@ fready-x svg{
   height: 100%;
   width: 100%;
 }
+
+.fready-art-locator{
+    border-top: 1px solid gray;
+}
 /* 
 svg {
   width: 100%;

@@ -13,6 +13,7 @@ function is_readable_(doc){
   return isProbablyReaderable(doc)
 }
 function calc_words(){
+  // todo check if readability document parse is a null and dont get len
   return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
 }
 
@@ -227,30 +228,25 @@ $("fready-x").click(() => {
 
 if (is_readable_(document)){
   log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
-  showhide()
-  log($(slurp_body()).text())
-  let text_identifier = $(slurp_body()).text().slice(0, ART_LOCATOR_LEN)
+  // let text_identifier = $(slurp_body()).text().slice(0, ART_LOCATOR_LEN)
+  let text_identifier = $(slurp_body()).find('p').text().slice(0, ART_LOCATOR_LEN)
   log(text_identifier)
   let art_locator = null
   let search_these =   [ 'p', 'span', 'article', 'div', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
   search_these.some( el => {
     art_locator = $(`${el}:contains("${text_identifier}")`)
     log(`${el}:contains("${text_identifier}")`)
-    if (art_locator != null && art_locator.text().includes(text_identifier)) {
-      log(art_locator.text())
+    if (art_locator != null && art_locator.text().length > 1 ){
+      art_locator = $(art_locator[art_locator.length-1])
       return true
     }
   })
-  art_locator.css('background-color', 'red') 
+  log(art_locator)
+  art_locator.addClass('fready-art-locator')
+  tippy( ".fready-art-locator", {
+    content: 'Press space to read with Fready!',
+    placement: 'top-start',
+    showOnCreate: true
+  })
 }
-
-
-
-
-
-
-
-
-
-
 
