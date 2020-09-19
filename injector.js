@@ -18,7 +18,6 @@ function calc_words(){
 
 function slurp_body(){
   return minify(new Readability(document.cloneNode(true)).parse().content)
-  return $(document.body).html()
 }
 function w_body(){
   
@@ -226,4 +225,32 @@ $("fready-x").click(() => {
   readexit(true)
 })
 
-log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
+if (is_readable_(document)){
+  log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
+  showhide()
+  log($(slurp_body()).text())
+  let text_identifier = $(slurp_body()).text().slice(0, ART_LOCATOR_LEN)
+  log(text_identifier)
+  let art_locator = null
+  let search_these =   [ 'p', 'span', 'article', 'div', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
+  search_these.some( el => {
+    art_locator = $(`${el}:contains("${text_identifier}")`)
+    log(`${el}:contains("${text_identifier}")`)
+    if (art_locator != null && art_locator.text().includes(text_identifier)) {
+      log(art_locator.text())
+      return true
+    }
+  })
+  art_locator.css('background-color', 'red') 
+}
+
+
+
+
+
+
+
+
+
+
+
