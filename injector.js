@@ -85,10 +85,10 @@ function visual_unsave(){
 }
 
 function load_frd(local_frd, cmd=null){
-  log(`loading FRD [ ${local_frd != null ? "niada" : local_frd} ] - [ ${cmd} ]`)
+  log(`loading FRD [ ${local_frd == null ? "niada" : local_frd} ] - [ ${cmd} ]`)
   table(frd)
 
-  if (local_frd != null && user != null){
+  if (local_frd != null && user != null && local_frd.id){
     frd = local_frd
     $(frame).html(`<div><iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe></div>`)
     // $(frame)[0].contentWindow.focus()
@@ -118,6 +118,17 @@ function load_frd(local_frd, cmd=null){
   }
 }
 
+function toggle_read(){
+  if (frd!=null){
+    table(frd)
+    $("#readthisfready").addClass("x-fready-exit")
+    $("#readthisfready").text(`EXIT`)
+    $(document.body).fadeOut(210)
+    $(frame).insertAfter(document.body)
+    $(frame).find('iframe').fadeTo(0, 0.01)
+    $(frame).find('iframe').fadeTo(200, 1)
+  }
+}
 function readexit(pop=false){
   read = !read
   if (frd !=null && read){
@@ -247,8 +258,8 @@ function load_fready(){
 
 }
 
+log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
 if (is_readable_(document)){
-  log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
   load_fready()
   setTimeout( () => {
     let art_locator = locate_art()
