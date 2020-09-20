@@ -5,6 +5,7 @@ let read = false
 let saved = false
 let show = POPUP_DEFAULT
 var minifyy = require('html-minifier-terser').minify
+
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
@@ -19,25 +20,24 @@ function calc_words(){
 function slurp_body(){
   return minify(new Readability(document.cloneNode(true)).parse().content)
 }
-function w_body(){
-  
-}
 
 // ------------ talking with background ------------ //
-function request_new_frd() {
-  log('requesting new frd')
+
+function sync_frd() {
+  log(`> Syncing FRD - current frd - ${frd}`)
   chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
   })
 }
 
-function request(request_str){
-  log('sending the request for new frd')
-  chrome.runtime.sendMessage({ request: request_str, html: slurp_body()}, (response) => {
+function request(request_str, options={}){
+  
+  log(`> Requesting to ${request_str}`)
+  let msg = { request: request_str }
+  if (options.skip_slurp) msg.html = slurp_body() 
+
+  chrome.runtime.sendMessage(msg, (response) => {
+    log(`> Response: ${response}`)
   })
-}
-function request_read() {
-  log('requesting read frd')
-  request("read")
 }
 
 function update_eta(){
@@ -49,18 +49,7 @@ function calc_eta(){
   return Math.floor(calc_words() / JSON.parse(user.prefs).wpm) 
 }
 
-function perform_save() {
-  log("saving")
-  table(slurp_body())
-  request("save")
-}
-
-function perform_unsave() {
-  chrome.runtime.sendmessage({ request: "unsave" }, (response) => {
-  })
-}
-
-function sync_up_user(){
+function sync_user(){
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
     user = data.freadyslovelyuser
     if (user.name) {
@@ -74,7 +63,37 @@ function sync_up_user(){
   })
 }
 
-// ------------ front ------------ //
+function load_frd(new_frd, cmd=null){
+  if (!(new_frd && new_frd.id && user)) return false
+
+  log(`> Loading new FRD - command: ${cmd}`)
+  table(new_frd)
+  
+  // TODO fix this shit
+  frd = new_frd
+  $(frame).html(`<div><iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${new_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe></div>`)
+
+  if (cmd == 'read') {
+    log('> CMD read - toggling read')
+    toggle_read()
+  }else{
+    read = true
+    readexit(false)
+  }
+
+  if (new_frd.saved){
+    visual_save()
+    saved = true
+  }else{
+    visual_unsave()
+    saved = false
+  }
+
+  return new_frd
+}
+
+
+// ------------ front end ------------ //
 function visual_save(){
   $("#savethisfready").addClass("x-fready-inactive")
   $("#savethisfready").html(`SAVED`)
@@ -84,51 +103,28 @@ function visual_unsave(){
   $("#savethisfready").html(`SAVE`)
 }
 
-function load_frd(local_frd, cmd=null){
-  log(`loading FRD [ ${local_frd == null ? "niada" : local_frd} ] - [ ${cmd} ]`)
-  table(frd)
-
-  if (local_frd != null && user != null && local_frd.id){
-    frd = local_frd
-    $(frame).html(`<div><iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe></div>`)
-    // $(frame)[0].contentWindow.focus()
-    if (cmd != null && cmd == 'read') {
-      log('i need to read')
-      $(document.body).fadeTo(200, 1)
-      read = false
-      readexit(true)
-      setTimeout(() => {
-        showhide()
-      }, 1000)
-    }else{
-      read = true
-      readexit(false)
-    }
-
-    if (local_frd.saved){
-      visual_save()
-      saved = true
-    }else{
-      visual_unsave()
-      saved = false
-    }
-    return local_frd
-  }else{
-    return null
-  }
+function inject_lector(){
+  $("#readthisfready").addClass("x-fready-exit")
+  $("#readthisfready").text(`EXIT`)
+  $(document.body).fadeOut(210)
+  $(frame).insertAfter(document.body)
+  $(frame).find('iframe').fadeTo(0, 0.01)
+  $(frame).find('iframe').fadeTo(200, 1)
 }
 
 function toggle_read(){
+  if (read) return false;
   if (frd!=null){
-    table(frd)
-    $("#readthisfready").addClass("x-fready-exit")
-    $("#readthisfready").text(`EXIT`)
-    $(document.body).fadeOut(210)
-    $(frame).insertAfter(document.body)
-    $(frame).find('iframe').fadeTo(0, 0.01)
-    $(frame).find('iframe').fadeTo(200, 1)
+    log('> Injecting lector & starting to read.. Have fun reading!')     
+    read = true
+  
+    inject_lector()
+  }else{
+    log('> FRD not ready. Requesting read')
+    request('read')
   }
 }
+
 function readexit(pop=false){
   read = !read
   if (frd !=null && read){
@@ -141,10 +137,9 @@ function readexit(pop=false){
       $(frame).find('iframe').fadeTo(0, 0.01)
       $(frame).find('iframe').fadeTo(200, 1)
     }else{
-      request_read()
+      request('read')
       $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
-
       $(document.body).fadeTo(200, 0.5)
     }
     
@@ -164,28 +159,36 @@ function saveunsave(){
   saved = !saved
   if (saved){
     visual_save()
-    perform_save()
+    request('save')
   }else{
-    perform_unsave()
     visual_unsave()
+    request('unsave', {skip_slurp: true})
   }
 }
 
+function toggle_show(){
+  show = true
+  $('#fready_ui')
+    .css({'filter': 'saturate(1)'})
+    .slideDown(70)
+    .fadeTo(10, 1)
+}
+function toggle_hide(){
+  show = false
+  $("#fready_ui")
+    .css({ 'filter': 'saturate(0)' })
+    .fadeTo(200, 0.5)
+    .slideUp(100)
+}
+  
 function showhide(){
   show = !show
   if (show){
-    $('#fready_ui')
-      .css({'filter': 'saturate(1)'})
-      .slideDown(70)
-      .fadeTo(10, 1)
+    toggle_show()
   }else{
-    $("#fready_ui")
-      .css({ 'filter': 'saturate(0)' })
-      .fadeTo(200, 0.5)
-      .slideUp(100)
+    toggle_hide()
   }
 }
-
 
 function cleanup(){
   $('fready').remove()
@@ -198,7 +201,7 @@ function cleanup(){
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") showhide()
   if (request.user){
-    sync_up_user(request.user)
+    sync_user(request.user)
   }
   if (request.frd){
     load_frd(request.frd, request.cmd)
@@ -211,6 +214,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 })
 
 function locate_art(){
+  // TODO improve this
   let text_identifier = $(slurp_body()).find('p').text().slice(ART_LOCATOR_SHIFT, ART_LOCATOR_LEN+ART_LOCATOR_SHIFT)
   log(text_identifier)
   let art_locator = null
@@ -227,12 +231,12 @@ function locate_art(){
   log(art_locator)
   return art_locator
 }
-// ------------ onload ------------ //
+
 function load_fready(){
   // cleanup() // clean up before starting a new instance
-  sync_up_user() // sync up with local user before triggering any functions
+  sync_user()   // sync up with local user before triggering any functions
+  sync_frd()    // sync frd with backend
   $(ui).insertAfter(document.body)
-  request_new_frd()
   // update_eta()
 
   if (!show){
@@ -258,6 +262,7 @@ function load_fready(){
 
 }
 
+// ------------ onload ------------ //
 log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
 if (is_readable_(document)){
   load_fready()
@@ -275,6 +280,6 @@ if (is_readable_(document)){
       interactive: true,
       hideOnClick: false
     })
-    Mousetrap.bind('space', () => { readexit(); return false})
+    Mousetrap.bind('space', () => { toggle_read(); return false})
   }, CHILL_OUT_TIME)
 }

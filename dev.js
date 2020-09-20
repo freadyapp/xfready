@@ -9,6 +9,20 @@ const DEF_PREF = {
   // if the user doesnt have any prefs these will be used to calculate stuff
   "wpm": 250
 }
+const CONTENT_SCRIPTS = [
+  "third_party/jquery.min.js",
+  "third_party/minihtml.min.js",
+  "third_party/mousetrap.min.js",
+  "third_party/readability.js",
+  "third_party/readable.js",
+  "third_party/tippy.min.js",
+  "dev.js",
+  "assets/ui.js",
+  "helpers.js",
+  "injector.js"
+]
+
+const CONTENT_CSS = 'injector.css'
 
 function log(txt) {
   if (!DEVELOPMENT) return true

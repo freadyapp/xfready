@@ -221,21 +221,11 @@ class Fready {
 }
 
 
-function inject(tab){
+function inject_content(tab){
   chrome.tabs.insertCSS(tab.id, {
-    file: "injector.css"
+    file: CONTENT_CSS
   })
-  let scripts = [
-    "third_party/jquery.min.js",
-    "third_party/minihtml.min.js",
-    "third_party/readability.js",
-    "third_party/readable.js",
-    "dev.js",
-    "assets/ui.js",
-    "helpers.js",
-    "injector.js"
-  ]
-  scripts.forEach((script) => {
+  CONTENT_SCRIPTS.forEach((script) => {
     chrome.tabs.executeScript(tab.id, {
       file: script
     })
@@ -292,7 +282,7 @@ chrome.browserAction.onClicked.addListener(tab => {
         fr.reload()
       } else {
         log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
-        inject(tab)
+        inject_content(tab)
       }
     })
   })
