@@ -209,8 +209,18 @@ fready-x svg{
 }
 
 .fready-art-locator{
-    border-top: 1px solid gray;
 }
+
+.tippy-box[data-theme~='fready'] {
+    background-color: white;
+    color: gray;
+    border-radius: 9999px;
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.13); 
+    font-family: Inter !important;
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+}  
 /* 
 svg {
   width: 100%;

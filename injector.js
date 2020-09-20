@@ -5,7 +5,6 @@ let read = false
 let saved = false
 let show = POPUP_DEFAULT
 var minifyy = require('html-minifier-terser').minify
-
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
@@ -45,6 +44,11 @@ function update_eta(){
   chrome.runtime.sendMessage( { request: 'eta', eta: calc_words() })
 }
 
+function calc_eta(){
+  if (user == null) return -1 
+  return Math.floor(calc_words() / JSON.parse(user.prefs).wpm) 
+}
+
 function perform_save() {
   log("saving")
   table(slurp_body())
@@ -52,7 +56,7 @@ function perform_save() {
 }
 
 function perform_unsave() {
-  chrome.runtime.sendMessage({ request: "unsave" }, (response) => {
+  chrome.runtime.sendmessage({ request: "unsave" }, (response) => {
   })
 }
 
@@ -86,7 +90,7 @@ function load_frd(local_frd, cmd=null){
 
   if (local_frd != null && user != null){
     frd = local_frd
-    $(frame).html(`<iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe>`)
+    $(frame).html(`<div><iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${local_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe></div>`)
     // $(frame)[0].contentWindow.focus()
     if (cmd != null && cmd == 'read') {
       log('i need to read')
@@ -121,10 +125,10 @@ function readexit(pop=false){
     if (pop){
       $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
+      $(document.body).fadeOut(210)
       $(frame).insertAfter(document.body)
-      $(document.body).fadeOut()
-      $(frame).fadeTo(0, 0.01)
-      $(frame).fadeTo(200, 1)
+      $(frame).find('iframe').fadeTo(0, 0.01)
+      $(frame).find('iframe').fadeTo(200, 1)
     }else{
       request_read()
       $("#readthisfready").addClass("x-fready-exit")
@@ -195,44 +199,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return sendResponse('ok')
 })
 
-// ------------ onload ------------ //
-
-
-cleanup() // clean up before starting a new instance
-sync_up_user() // sync up with local user before triggering any functions
-
-$(ui).insertAfter(document.body)
-request_new_frd()
-// update_eta()
-
-if (!show){
-  $("#fready_ui")
-  .fadeTo(0, 0.5)
-  .css({ 'filter': 'saturate(0)' })
-  .slideUp(0)
-}
-
-$("#readthisfready").click(() => {
-  readexit()
-})
-$("#savethisfready").click(() => {
-  saveunsave()
-})
-$(".freadyhide").click(() => {
-  showhide()
-})
-
-$("fready-x").click(() => {
-  readexit(true)
-})
-
-if (is_readable_(document)){
-  log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
-  // let text_identifier = $(slurp_body()).text().slice(0, ART_LOCATOR_LEN)
-  let text_identifier = $(slurp_body()).find('p').text().slice(0, ART_LOCATOR_LEN)
+function locate_art(){
+  let text_identifier = $(slurp_body()).find('p').text().slice(ART_LOCATOR_SHIFT, ART_LOCATOR_LEN+ART_LOCATOR_SHIFT)
   log(text_identifier)
   let art_locator = null
-  let search_these =   [ 'p', 'span', 'article', 'div', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
+  let search_these =   [ 'p', 'span', 'div', 'article', 'table', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
   search_these.some( el => {
     art_locator = $(`${el}:contains("${text_identifier}")`)
     log(`${el}:contains("${text_identifier}")`)
@@ -241,12 +212,58 @@ if (is_readable_(document)){
       return true
     }
   })
+  art_locator = art_locator || $(document.body)
   log(art_locator)
-  art_locator.addClass('fready-art-locator')
-  tippy( ".fready-art-locator", {
-    content: 'Press space to read with Fready!',
-    placement: 'top-start',
-    showOnCreate: true
+  return art_locator
+}
+// ------------ onload ------------ //
+function load_fready(){
+  // cleanup() // clean up before starting a new instance
+  sync_up_user() // sync up with local user before triggering any functions
+  $(ui).insertAfter(document.body)
+  request_new_frd()
+  // update_eta()
+
+  if (!show){
+    $("#fready_ui")
+    .fadeTo(0, 0.5)
+    .css({ 'filter': 'saturate(0)' })
+    .slideUp(0)
+  }
+
+  $("#readthisfready").click(() => {
+    readexit()
   })
+  $("#savethisfready").click(() => {
+    saveunsave()
+  })
+  $(".freadyhide").click(() => {
+    showhide()
+  })
+
+  $("fready-x").click(() => {
+    readexit(true)
+  })
+
 }
 
+if (is_readable_(document)){
+  log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
+  load_fready()
+  setTimeout( () => {
+    let art_locator = locate_art()
+    log(art_locator)
+    art_locator.addClass('fready-art-locator')
+    tippy( ".fready-art-locator", {
+      allowHTML: true,
+      content: `${calc_eta()} - Press <strong> space </strong> to read with Fready`,
+      placement: 'top-start',
+      theme: 'fready',
+      arrow: false,
+      showOnCreate: true,
+      interactive: true,
+      hideOnClick: false
+    })
+    Mousetrap.bind('space', () => { readexit(); return false})
+  }, CHILL_OUT_TIME)
+}

@@ -20,10 +20,14 @@
         "all_frames": true,
         "match_about_blank": true,
         "matches": [ "<all_urls>" ],
+        "exclude_matches": [
+          "*://docs.google.com/document/*"
+        ],
         "run_at": "document_idle",
         "js": [
             "third_party/jquery.min.js",
             "third_party/minihtml.min.js",
+            "third_party/mousetrap.min.js",
             "third_party/readability.js",
             "third_party/readable.js",
             "third_party/tippy.min.js",
