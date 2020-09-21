@@ -237,6 +237,18 @@ fready-x svg{
 .fready-art-locator{
 }
 
+/*
+ FREADY - ALMA
+ */
+fready-alma,
+fready-alma::before,
+fready-alma::after,
+fready-alma *
+fready-alma *::before,
+fready-alma *::after {
+  all: revert;
+}
+
 fready-alma{
     font-family: Inter !important;
     user-select: none;
