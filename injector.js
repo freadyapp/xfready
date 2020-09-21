@@ -1,10 +1,12 @@
 let user = null
 let frd = null
 let frame = $(`<lector></lector>`)
-let read = false
+let reading = false
+let screen = ''
 let saved = false
 let show = POPUP_DEFAULT
 var minifyy = require('html-minifier-terser').minify
+let alma = null
 
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
@@ -46,7 +48,7 @@ function update_eta(){
 
 function calc_eta(){
   if (user == null) return -1 
-  return Math.floor(calc_words() / JSON.parse(user.prefs).wpm) 
+  return Math.floor(calc_words() / (JSON.parse(user.prefs).wpm || 250)) 
 }
 
 function sync_user(){
@@ -71,13 +73,14 @@ function load_frd(new_frd, cmd=null){
   
   // TODO fix this shit
   frd = new_frd
-  $(frame).html(`<div><iframe id="freadysscreen" onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${new_frd.id}&api_key=${user.api_key}" style="position:fixed;z-index:9696969696;border:none" width="100%" height="100%"></iframe></div>`)
-
+  $(frame).html(make_frame())
+  screen = $('#freadysscreen')
+  screen.fadeOut()
   if (cmd == 'read') {
     log('> CMD read - toggling read')
     toggle_read()
   }else{
-    read = true
+    reading = true
     readexit(false)
   }
 
@@ -94,6 +97,11 @@ function load_frd(new_frd, cmd=null){
 
 
 // ------------ front end ------------ //
+function make_frame(){
+  return `<div id='screen-bg'></div>
+<div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
+}
+
 function visual_save(){
   $("#savethisfready").addClass("x-fready-inactive")
   $("#savethisfready").html(`SAVED`)
@@ -106,17 +114,17 @@ function visual_unsave(){
 function inject_lector(){
   $("#readthisfready").addClass("x-fready-exit")
   $("#readthisfready").text(`EXIT`)
-  $(document.body).fadeOut(210)
+  //$(document.body).fadeOut(210)
   $(frame).insertAfter(document.body)
-  $(frame).find('iframe').fadeTo(0, 0.01)
-  $(frame).find('iframe').fadeTo(200, 1)
+  $(frame).fadeTo(0, 0.01)
+  $(frame).fadeTo(1200, 1)
 }
 
 function toggle_read(){
-  if (read) return false;
+  if (reading) return false;
   if (frd!=null){
     log('> Injecting lector & starting to read.. Have fun reading!')     
-    read = true
+    reading = true
   
     inject_lector()
   }else{
@@ -126,21 +134,21 @@ function toggle_read(){
 }
 
 function readexit(pop=false){
-  read = !read
-  if (frd !=null && read){
+  reading = !reading
+  if (frd !=null && reading){
     table(frd)
     if (pop){
       $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
-      $(document.body).fadeOut(210)
+      //$(document.body).fadeOut(210)
       $(frame).insertAfter(document.body)
-      $(frame).find('iframe').fadeTo(0, 0.01)
-      $(frame).find('iframe').fadeTo(200, 1)
+      //$(frame).find('iframe').fadeTo(0, 0.01)
+      //$(frame).find('iframe').fadeTo(200, 1)
     }else{
       request('read')
       $("#readthisfready").addClass("x-fready-exit")
       $("#readthisfready").text(`EXIT`)
-      $(document.body).fadeTo(200, 0.5)
+      //$(document.body).fadeTo(200, 0.5)
     }
     
     setTimeout(() => {
@@ -150,7 +158,7 @@ function readexit(pop=false){
     $("#readthisfready").removeClass("x-fready-exit")
     $("#readthisfready").text(`READ`)
     $(document.body).fadeIn()
-    $(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
+    //$(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
     $("fready-x").fadeOut()
   }
 }
@@ -261,7 +269,11 @@ function load_fready(){
   })
 
 }
-
+function make_alma(){
+  return `<fready-alma><div id='fready-alma-eta'>${calc_eta()}'</div>
+  ${space_to_read}</fready-alma>`
+  return `${calc_eta()} - Press <strong> space </strong> to read with Fready` 
+}
 // ------------ onload ------------ //
 log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
 if (is_readable_(document)){
@@ -270,16 +282,21 @@ if (is_readable_(document)){
     let art_locator = locate_art()
     log(art_locator)
     art_locator.addClass('fready-art-locator')
-    tippy( ".fready-art-locator", {
+    alma = tippy( ".fready-art-locator", {
       allowHTML: true,
-      content: `${calc_eta()} - Press <strong> space </strong> to read with Fready`,
+      content: make_alma(),
       placement: 'top-start',
       theme: 'fready',
       arrow: false,
       showOnCreate: true,
       interactive: true,
-      hideOnClick: false
+      hideOnClick: false,
+      onHide(){
+        return false;
+      }
     })
-    Mousetrap.bind('space', () => { toggle_read(); return false})
+    Mousetrap.bind('space', () => {toggle_read(); return false})
   }, CHILL_OUT_TIME)
 }
+
+

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap');
-
+/*
+ TODO clean this shit up man
+ */
 fready-block div,
 form,
 fieldset,
@@ -76,6 +78,30 @@ fready-block{
   box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
   text-align: center;
   font-size: 17px !important;
+}
+
+lector {
+    width: 100vw;
+    height: 100vh;
+    background-color: #303030;
+    background-color: transparent;
+    position: fixed;
+    top: 0;
+    z-index: 9999999999999999999;
+    /*left: 0;*/
+}
+lector #screen-bg{
+    z-index: -1;
+    background-color: #404040;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+lector #freadysscreen{
+    z-index: 2;
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
 fready a{
@@ -212,15 +238,44 @@ fready-x svg{
 }
 
 .tippy-box[data-theme~='fready'] {
+    font-family: Inter !important;
+    user-select: none;
+    background-color: transparent;
+
+}  
+fready-alma{
     background-color: white;
     color: gray;
-    border-radius: 9999px;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.13); 
-    font-family: Inter !important;
-    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1); 
     cursor: pointer;
-    user-select: none;
-}  
+    height: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+fready-alma svg{
+    height: 1.2em;
+    display: flex;
+    padding-right: .9em;
+}
+fready-alma #fready-alma-eta{
+    position: relative;
+    left: 0em;
+    width: 2em;
+    height: 1em;
+    padding-left: .6em;
+    padding-right: .6em;
+    margin-right: 1em;
+    color: #2b6cce;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #eee;
+    white-space: nowrap;
+    
+}
 /* 
 svg {
   width: 100%;
