@@ -277,8 +277,9 @@ class Alma {
     inject_alma(this.dom, art_locator)
     this.dom.fadeTo(0, .01)
     // declaring some shortcuts
-    this.space_to_read = this.dom.find('svg')
-
+    this.space_to_read = this.dom.find('#fready-alma-space')
+    this.logo = this.dom.find('#fready-alma-logo')
+    this.eta = this.dom.find('#fready-alma-eta')
     this.appear()
   }
   appear(){
@@ -286,13 +287,19 @@ class Alma {
     let final_width = this.dom.width()
     this.dom.css({'width': this.dom.height()})
     this.space_to_read.fadeOut(0)
-    this.dom.fadeTo(250, 1)
+    this.eta.fadeOut(0)
+
+    this.dom.fadeTo(450, 1, 'swing')
     setTimeout( () => {
-      this.space_to_read.fadeIn(100)
+      this.eta.fadeIn(100)
+      setTimeout(() => this.space_to_read.fadeIn(100), 300)
+      setTimeout(() => this.space_to_read.fadeTo(350, .3), 600)
+      setTimeout(() => this.space_to_read.fadeTo(400, 1), 1000)
+      this.logo.fadeOut(100)
       this.dom.animate({
         width: final_width 
       }, {duration: 450})
-    }, 2000)
+    }, 1200)
   }
   disappear(){
     
@@ -301,9 +308,13 @@ class Alma {
     
   }
   make_alma(){
-    return $(`<fready-alma><div id='fready-alma-eta'>${calc_eta()}'</div>
-    ${space_to_read}</fready-alma>`)
-    return `${calc_eta()} - Press <strong> space </strong> to read with Fready` 
+    return $(`
+    <fready-alma>
+      <div class='fready-alma-left' id='fready-alma-logo'>${fready_logo}</div>
+      <div class='fready-alma-left' id='fready-alma-eta'>${calc_eta()}'</div>
+
+      <div class='fready-alma-right' id='fready-alma-space'>${space_to_read}</div>
+    </fready-alma>`)
   }
 }
 // ------------ onload ------------ //
@@ -318,5 +329,4 @@ if (is_readable_(document)){
     Mousetrap.bind('space', () => {toggle_read(); return false})
   }, CHILL_OUT_TIME)
 }
-
 

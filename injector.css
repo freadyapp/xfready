@@ -243,7 +243,7 @@ fready-alma{
     background-color: transparent;
     background-color: white;
     color: gray;
-    border-radius: 10px;
+    border-radius: 7px;
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1); 
     cursor: pointer;
     height: 2em;
@@ -254,19 +254,29 @@ fready-alma{
     position: absolute;
     margin-top: -2.2em;
 }
-
-fready-alma svg{
+fready-alma .fready-alma-left{
+}
+fready-alma .fready-alma-right{
+    
+}
+fready-alma #fready-alma-space{
     height: 1.2em;
+    margin-left: 3em;
+    width: 8em;
     display: flex;
-    padding-right: .9em;
+}
+fready-alma #fready-alma-logo{
+    width: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: .5em;
+    padding-right: .3em;
 }
 fready-alma #fready-alma-eta{
-    position: relative;
-    left: 0em;
-    width: 2em;
+    width: 1em;
     height: 1em;
-    padding-left: .6em;
-    padding-right: .6em;
+    padding-right: 1em;
     margin-right: 1em;
     color: #2b6cce;
     display: flex;
@@ -274,6 +284,11 @@ fready-alma #fready-alma-eta{
     align-items: center;
     border-right: 1px solid #eee;
     white-space: nowrap;
+    position: absolute;
+    left: .9em;
+}
+fready-alma svg{
+    width: 100%;
 }
 /* 
 svg {
