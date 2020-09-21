@@ -62,3 +62,7 @@ function idleTimer(options) {
   };
 }
 
+function inject_alma(alma, art_start){
+  $(art_start).prepend(alma) 
+}
+

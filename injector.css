@@ -237,13 +237,10 @@ fready-x svg{
 .fready-art-locator{
 }
 
-.tippy-box[data-theme~='fready'] {
+fready-alma{
     font-family: Inter !important;
     user-select: none;
     background-color: transparent;
-
-}  
-fready-alma{
     background-color: white;
     color: gray;
     border-radius: 10px;
@@ -253,6 +250,9 @@ fready-alma{
     display: flex;
     justify-content: center;
     align-items: center;
+    
+    position: absolute;
+    margin-top: -2.2em;
 }
 
 fready-alma svg{
@@ -274,7 +274,6 @@ fready-alma #fready-alma-eta{
     align-items: center;
     border-right: 1px solid #eee;
     white-space: nowrap;
-    
 }
 /* 
 svg {

@@ -15,7 +15,6 @@ const CONTENT_SCRIPTS = [
   "third_party/mousetrap.min.js",
   "third_party/readability.js",
   "third_party/readable.js",
-  "third_party/tippy.min.js",
   "dev.js",
   "assets/ui.js",
   "helpers.js",

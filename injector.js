@@ -1,3 +1,5 @@
+var minifyy = require('html-minifier-terser').minify
+
 let user = null
 let frd = null
 let frame = $(`<lector></lector>`)
@@ -5,7 +7,6 @@ let reading = false
 let screen = ''
 let saved = false
 let show = POPUP_DEFAULT
-var minifyy = require('html-minifier-terser').minify
 let alma = null
 
 function minify(html){
@@ -267,12 +268,43 @@ function load_fready(){
   $("fready-x").click(() => {
     readexit(true)
   })
-
 }
-function make_alma(){
-  return `<fready-alma><div id='fready-alma-eta'>${calc_eta()}'</div>
-  ${space_to_read}</fready-alma>`
-  return `${calc_eta()} - Press <strong> space </strong> to read with Fready` 
+// TODO make menu like this
+class Alma {
+  constructor(art_locator){
+    log('> Creating & Injecting Alma')
+    this.dom = this.make_alma()
+    inject_alma(this.dom, art_locator)
+    this.dom.fadeTo(0, .01)
+    // declaring some shortcuts
+    this.space_to_read = this.dom.find('svg')
+
+    this.appear()
+  }
+  appear(){
+    log('> Fading Alma in')
+    let final_width = this.dom.width()
+    this.dom.css({'width': this.dom.height()})
+    this.space_to_read.fadeOut(0)
+    this.dom.fadeTo(250, 1)
+    setTimeout( () => {
+      this.space_to_read.fadeIn(100)
+      this.dom.animate({
+        width: final_width 
+      }, {duration: 450})
+    }, 2000)
+  }
+  disappear(){
+    
+  }
+  hover(){
+    
+  }
+  make_alma(){
+    return $(`<fready-alma><div id='fready-alma-eta'>${calc_eta()}'</div>
+    ${space_to_read}</fready-alma>`)
+    return `${calc_eta()} - Press <strong> space </strong> to read with Fready` 
+  }
 }
 // ------------ onload ------------ //
 log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
@@ -282,19 +314,7 @@ if (is_readable_(document)){
     let art_locator = locate_art()
     log(art_locator)
     art_locator.addClass('fready-art-locator')
-    alma = tippy( ".fready-art-locator", {
-      allowHTML: true,
-      content: make_alma(),
-      placement: 'top-start',
-      theme: 'fready',
-      arrow: false,
-      showOnCreate: true,
-      interactive: true,
-      hideOnClick: false,
-      onHide(){
-        return false;
-      }
-    })
+    alma = new Alma(art_locator)
     Mousetrap.bind('space', () => {toggle_read(); return false})
   }, CHILL_OUT_TIME)
 }
