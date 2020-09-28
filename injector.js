@@ -121,6 +121,10 @@ function inject_lector(){
   $(frame).fadeTo(1200, 1)
 }
 
+function go_dashboard(){
+  log('going to dashbaord')
+}
+
 function toggle_read(){
   if (reading) return false;
   if (frd!=null){
@@ -280,15 +284,20 @@ class Alma {
     this.space_to_read = this.dom.find('#fready-alma-space')
     this.logo = this.dom.find('#fready-alma-logo')
     this.eta = this.dom.find('#fready-alma-eta')
+    this.menu = this.dom.find('#fready-alma-menu')
+    this.x_button = this.dom.find('#fready-alma-x')
+    this.save = this.dom.find('#fready-alma-save')
+    this.read = this.dom.find('#fready-alma-read')
+    this.wire_alma()
     this.appear()
+    this.dom.hover( () => this.hover(), () => this.not_hover() )
   }
   appear(){
     log('> Fading Alma in')
     let final_width = this.dom.width()
     this.dom.css({'width': this.dom.height()})
-    this.space_to_read.fadeOut(0)
-    this.eta.fadeOut(0)
-
+    this.fade_out_all()
+    this.logo.fadeIn(0)
     this.dom.fadeTo(450, 1, 'swing')
     setTimeout( () => {
       this.eta.fadeIn(100)
@@ -301,20 +310,61 @@ class Alma {
       }, {duration: 450})
     }, 1200)
   }
+  press_save(){
+    log('Clicked on alma save')
+  }
+  press_read(){
+    log('Clicked on alma read')
+    toggle_read()
+  }
   disappear(){
-    
+   log('yeeting alma') 
   }
   hover(){
-    
+    log('> Alma is hovered')
+    this.state_two(60)
+  }
+  not_hover(){
+    this.state_one(60)
   }
   make_alma(){
     return $(`
     <fready-alma>
-      <div class='fready-alma-left' id='fready-alma-logo'>${fready_logo}</div>
-      <div class='fready-alma-left' id='fready-alma-eta'>${calc_eta()}'</div>
+      <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>${fready_logo}</fready-element>
+      <fready-element class='fready-alma-sector-left' id='fready-alma-eta'>${calc_eta()}'</fready-element>
 
-      <div class='fready-alma-right' id='fready-alma-space'>${space_to_read}</div>
+      <fready-element class='fready-alma-sector-right' id='fready-alma-space'>${space_to_read}</fready-element>
+      <fready-element class='fready-alma-sector-right' id='fready-alma-menu'>
+        <fready-element class='fready-alma-button' id='fready-alma-save'>SAVE</fready-element>
+        <fready-element class='fready-alma-button' id='fready-alma-read'>READ</fready-element>
+        <fready-element id='fready-alma-x'>${x_button_dark}</fready-element>
+      </fready-element>
     </fready-alma>`)
+  }
+  wire_alma(){
+    this.space_to_read.click(() => alma.press_read())
+    this.read.click(() => alma.press_read())
+    this.save.click(() => alma.press_save())
+    this.x_button.click(() => alma.disappear())
+    this.logo.click(() => go_dashboard())
+  }
+  state_one(animation){
+    this.space_to_read.fadeIn(animation)
+    this.logo.fadeOut(animation)
+    this.eta.fadeIn(animation)
+    this.menu.fadeOut(animation)
+  }
+  state_two(animation){
+    this.space_to_read.fadeOut(animation)
+    this.logo.fadeIn(animation)
+    this.eta.fadeOut(animation)
+    this.menu.fadeIn(animation)
+  }
+  fade_out_all(animation=0){
+    this.space_to_read.fadeOut(animation)
+    this.logo.fadeOut(animation)
+    this.eta.fadeOut(animation)
+    this.menu.fadeOut(animation)
   }
 }
 // ------------ onload ------------ //
