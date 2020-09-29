@@ -226,7 +226,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 function locate_art(){
   // TODO improve this
-  let text_identifier = $(slurp_body()).find('p').text().slice(ART_LOCATOR_SHIFT, ART_LOCATOR_LEN+ART_LOCATOR_SHIFT)
+  log("> attempting to locate art") 
+  let first_p = $(slurp_body()).find('p').text()
+  let text_identifier = first_p.slice(0, Math.min(first_p.length, ART_LOCATOR_LEN))
   log(text_identifier)
   let art_locator = null
   let search_these =   [ 'p', 'span', 'div', 'article', 'table', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
@@ -377,8 +379,9 @@ class Alma {
   }
 }
 // ------------ onload ------------ //
-log(`this is actually ${ is_readable_(document) ? "" : "not"} readable`)
+// TODO change this to a function that decides if to inject alma or not
 if (is_readable_(document)){
+  log('> Fready found a readable document')
   load_fready()
   setTimeout( () => {
     let art_locator = locate_art()
