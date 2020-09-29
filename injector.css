@@ -263,6 +263,7 @@ fready-alma{
     position: absolute;
     margin-top: -2.2em;
     width: 13em;
+    overflow: hidden;
 }
 
 fready-alma .fready-alma-sector-left{
@@ -293,21 +294,27 @@ fready-alma .fready-alma-button:hover {
     border-bottom: 1px solid lightgray;
 }
 fready-alma #fready-alma-save{
+    width: 4.5em;
+}
+fready-alma .fready-alma-save-inactive{
+    opacity: .8;
+}
+fready-alma .fready-alma-save-active{
     
 }
 fready-alma #fready-alma-read{
+    width: 4.5em;
     font-weight: bold;
-    border-right: 1px solid #f1f1f1;
+    border-left: 1px solid #eee;
 }
 fready-alma #fready-alma-x{
     margin-left:.3em;
-    opacity: .2;
+    opacity: .4;
     cursor: pointer;
 }
 fready-alma #fready-alma-x:hover{
     opacity: .8;
 }
-
 
 fready-alma #fready-alma-space{
 }
@@ -336,7 +343,6 @@ fready-alma #fready-alma-eta{
 fready-alma svg{
     width: 100%;
 }
-
 
 fready-alma #fready-alma-space{
 }

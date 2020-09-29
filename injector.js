@@ -99,8 +99,11 @@ function load_frd(new_frd, cmd=null){
 
 // ------------ front end ------------ //
 function make_frame(){
-  return `<div id='screen-bg'></div>
-<div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
+  return `<fready-x>${x_button}</fready-x><div id='screen-bg'></div>
+          <div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
+}
+function wire_frame(){
+  $('fready-x').click( ()=> toggle_exit())
 }
 
 function visual_save(){
@@ -112,17 +115,27 @@ function visual_unsave(){
   $("#savethisfready").html(`SAVE`)
 }
 
+function remove_lector(){
+  $(frame).fadeOut(100)
+}
+
 function inject_lector(){
   $("#readthisfready").addClass("x-fready-exit")
   $("#readthisfready").text(`EXIT`)
   //$(document.body).fadeOut(210)
   $(frame).insertAfter(document.body)
+  wire_frame()
   $(frame).fadeTo(0, 0.01)
-  $(frame).fadeTo(1200, 1)
+  $(frame).fadeTo(400, 1)
+  setTimeout( () => screen.fadeIn(), 350)
 }
 
 function go_dashboard(){
   log('going to dashbaord')
+}
+
+function get_save_text(inverse=false){
+  return (inverse ? !saved : saved) ? `<span class='fready-alma-save-inactive'>SAVED</span>` : `<span class='fready-alma-save-active'>SAVE</span>`
 }
 
 function toggle_read(){
@@ -137,34 +150,19 @@ function toggle_read(){
     request('read')
   }
 }
+function toggle_exit(){
+  log('> Removing lector')
+  $("#readthisfready").removeClass("x-fready-exit")
+  $("#readthisfready").text(`READ`)
+  remove_lector()
+  reading = false
+}
 
-function readexit(pop=false){
-  reading = !reading
-  if (frd !=null && reading){
-    table(frd)
-    if (pop){
-      $("#readthisfready").addClass("x-fready-exit")
-      $("#readthisfready").text(`EXIT`)
-      //$(document.body).fadeOut(210)
-      $(frame).insertAfter(document.body)
-      //$(frame).find('iframe').fadeTo(0, 0.01)
-      //$(frame).find('iframe').fadeTo(200, 1)
-    }else{
-      request('read')
-      $("#readthisfready").addClass("x-fready-exit")
-      $("#readthisfready").text(`EXIT`)
-      //$(document.body).fadeTo(200, 0.5)
-    }
-    
-    setTimeout(() => {
-      $("fready-x").fadeIn()
-    }, 4000)
+function readexit(force=false){
+  if (!reading || force){
+    toggle_read()
   }else{
-    $("#readthisfready").removeClass("x-fready-exit")
-    $("#readthisfready").text(`READ`)
-    $(document.body).fadeIn()
-    //$(frame).fadeTo(200, 0.01, () => { $(frame).remove() })
-    $("fready-x").fadeOut()
+    toggle_exit()
   }
 }
 
@@ -268,10 +266,6 @@ function load_fready(){
   $(".freadyhide").click(() => {
     showhide()
   })
-
-  $("fready-x").click(() => {
-    readexit(true)
-  })
 }
 // TODO make menu like this
 class Alma {
@@ -312,21 +306,35 @@ class Alma {
   }
   press_save(){
     log('Clicked on alma save')
+    this.save.html(get_save_text(true))
+    saveunsave()
   }
   press_read(){
     log('Clicked on alma read')
     toggle_read()
   }
   disappear(){
-   log('yeeting alma') 
+    log('yeeting alma') 
+    this.fade_out_all(90) 
+    setTimeout( () => {
+      this.dom.animate({
+        height: 0 
+      }, {duration: 150})
+      setTimeout( () => {
+        this.dom.fadeOut()
+      }, 130)
+    }, 90)
   }
+
   hover(){
     log('> Alma is hovered')
     this.state_two(60)
   }
+  
   not_hover(){
     this.state_one(60)
   }
+
   make_alma(){
     return $(`
     <fready-alma>
@@ -335,12 +343,13 @@ class Alma {
 
       <fready-element class='fready-alma-sector-right' id='fready-alma-space'>${space_to_read}</fready-element>
       <fready-element class='fready-alma-sector-right' id='fready-alma-menu'>
-        <fready-element class='fready-alma-button' id='fready-alma-save'>SAVE</fready-element>
+        <fready-element class='fready-alma-button' id='fready-alma-save'>${get_save_text()}</fready-element>
         <fready-element class='fready-alma-button' id='fready-alma-read'>READ</fready-element>
         <fready-element id='fready-alma-x'>${x_button_dark}</fready-element>
       </fready-element>
     </fready-alma>`)
   }
+
   wire_alma(){
     this.space_to_read.click(() => alma.press_read())
     this.read.click(() => alma.press_read())
