@@ -245,6 +245,8 @@ fready-alma *
 fready-alma *::before,
 fready-alma *::after {
     all: revert;
+    box-sizing: content-box !important;
+    --webkit-box-sizing: content-box !important;
 }
 
 fready-alma{
@@ -317,15 +319,33 @@ fready-alma #fready-alma-x:hover{
 }
 
 fready-alma #fready-alma-space{
+    box-sizing: content-box !important;
+    --webkit-box-sizing: content-box !important;
 }
 fready-alma #fready-alma-logo{
+    box-sizing: content-box !important;
+    --webkit-box-sizing: content-box !important;
+
     width: 1em;
+    height: 1em;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-left: .7em;
-    padding-right: .3em;
+    /*padding-left: .7em;*/
+    /*padding-right: .3em;*/
     cursor: pointer;
+    left: .6em;
+}
+fready-alma a{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+fready-icon{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 fready-alma #fready-alma-eta{
     width: 1em;
@@ -344,30 +364,3 @@ fready-alma svg{
     width: 100%;
 }
 
-fready-alma #fready-alma-space{
-}
-fready-alma #fready-alma-logo{
-    width: 1em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-left: .5em;
-    padding-right: .3em;
-    cursor: pointer;
-}
-fready-alma #fready-alma-eta{
-    width: 1em;
-    height: 1em;
-    padding-right: 1em;
-    margin-right: 1em;
-    color: #2b6cce;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-right: 1px solid #eee;
-    white-space: nowrap;
-    left: .9em;
-}
-fready-alma svg{
-    width: 100%;
-}

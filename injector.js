@@ -340,7 +340,9 @@ class Alma {
   make_alma(){
     return $(`
     <fready-alma>
-      <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>${fready_logo}</fready-element>
+      <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>
+      <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
+      </fready-element>
       <fready-element class='fready-alma-sector-left' id='fready-alma-eta'>${calc_eta()}'</fready-element>
 
       <fready-element class='fready-alma-sector-right' id='fready-alma-space'>${space_to_read}</fready-element>
