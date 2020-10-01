@@ -257,46 +257,47 @@ fready-alma{
     color: gray;
     border-radius: 3px;
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1); 
-    height: 2em;
+    height: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
     
     position: absolute;
-    margin-top: -2.2em;
-    width: 13em;
+    margin-top: -39.6px;
+    width: 234px;
     overflow: hidden;
+    font-size: 18px;
 }
 
 fready-alma .fready-alma-sector-left{
     position: absolute;
-    left: .1em;
+    left: 1.8px;
 }
 
 fready-alma .fready-alma-sector-right{
     display: flex;
-    height: 1.2em;
-    width: 9em;
+    height: 33px;
+    width: 162px;
     position: absolute;
-    right: 1em;
+    right: 18px;
 }
 fready-alma #fready-alma-menu{
 }
 
 fready-alma .fready-alma-button {
-    padding: 0 .25em;
-    margin: 0 .1em;
+    padding: 0 4.5px;
+    margin: 0 1.8px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid transparent;
+    opacity: .8;
 }
 fready-alma .fready-alma-button:hover {
-    border-bottom: 1px solid lightgray;
+    opacity: 1;
 }
 fready-alma #fready-alma-save{
-    width: 4.5em;
+    width: 81px;
 }
 fready-alma .fready-alma-save-inactive{
     opacity: .8;
@@ -305,14 +306,17 @@ fready-alma .fready-alma-save-active{
     
 }
 fready-alma #fready-alma-read{
-    width: 4.5em;
+    width: 81px;
     font-weight: bold;
     border-left: 1px solid #eee;
 }
 fready-alma #fready-alma-x{
-    margin-left:.3em;
+    margin-left: 6,4px;
     opacity: .4;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 fready-alma #fready-alma-x:hover{
     opacity: .8;
@@ -326,15 +330,15 @@ fready-alma #fready-alma-logo{
     box-sizing: content-box !important;
     --webkit-box-sizing: content-box !important;
 
-    width: 1em;
-    height: 1em;
+    width: 18px;
+    height: 18px;
     display: flex;
     justify-content: center;
     align-items: center;
     /*padding-left: .7em;*/
     /*padding-right: .3em;*/
     cursor: pointer;
-    left: .6em;
+    left: 10.8px;
 }
 fready-alma a{
     display: flex;
@@ -348,17 +352,17 @@ fready-icon{
     align-items: center;
 }
 fready-alma #fready-alma-eta{
-    width: 1em;
-    height: 1em;
-    padding-right: 1em;
-    margin-right: 1em;
+    width: 18px;
+    height: 18px;
+    padding-right: 18px;
+    margin-right: 18px;
     color: #2b6cce;
     display: flex;
     justify-content: center;
     align-items: center;
     border-right: 1px solid #eee;
     white-space: nowrap;
-    left: .9em;
+    left: 16.2px;
 }
 fready-alma svg{
     width: 100%;
