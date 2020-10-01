@@ -12,12 +12,17 @@ let alma = null
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
+function is_freadable(doc){
+  return calc_words() > MIN_WORDS_FOR_FREADABLE  && is_readable_(doc) 
+}
 function is_readable_(doc){
   return isProbablyReaderable(doc)
 }
 function calc_words(){
   // todo check if readability document parse is a null and dont get len
-  return Math.round(((new Readability(document.cloneNode(true)).parse().length) / 5))
+  let rdocument = new Readability(document.cloneNode(true))
+  if (rdocument == null) return 0
+  return Math.round(((rdocument.parse().length) / 5))
 }
 
 function slurp_body(){
@@ -28,8 +33,7 @@ function slurp_body(){
 
 function sync_frd() {
   log(`> Syncing FRD - current frd - ${frd}`)
-  chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {
-  })
+  chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {})
 }
 
 function request(request_str, options={}){
@@ -231,7 +235,7 @@ function locate_art(){
   let text_identifier = first_p.slice(0, Math.min(first_p.length, ART_LOCATOR_LEN))
   log(text_identifier)
   let art_locator = null
-  let search_these =   [ 'p', 'span', 'div', 'article', 'table', 'h1', 'h2', 'h3', 'h5', 'h6', '' ]
+  let search_these =   [ 'p', 'span', 'div', 'article', 'table', 'h1', 'h2', 'h3', 'h5', 'h6' ]
   search_these.some( el => {
     art_locator = $(`${el}:contains("${text_identifier}")`)
     log(`${el}:contains("${text_identifier}")`)
@@ -240,7 +244,7 @@ function locate_art(){
       return true
     }
   })
-  art_locator = art_locator || $(document.body)
+  art_locator = art_locator || $(document).find('p')
   log(art_locator)
   return art_locator
 }
@@ -382,7 +386,7 @@ class Alma {
 }
 // ------------ onload ------------ //
 // TODO change this to a function that decides if to inject alma or not
-if (is_readable_(document)){
+if (is_freadable(document)){
   log('> Fready found a readable document')
   load_fready()
   setTimeout( () => {
