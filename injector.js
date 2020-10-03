@@ -8,6 +8,7 @@ let screen = ''
 let saved = false
 let show = POPUP_DEFAULT
 let alma = null
+let freadable = null
 
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
@@ -19,14 +20,17 @@ function is_readable_(doc){
   return isProbablyReaderable(doc)
 }
 function calc_words(){
-  // todo check if readability document parse is a null and dont get len
-  let rdocument = (new Readability(document.cloneNode(true))).parse()
-  if (rdocument == null) return 0
-  return Math.round(((rdocument.length) / 5))
+  set_freadable()
+  if (freadable == null) return 0
+  return Math.ceil(((freadable.length) / 5))
 }
-
+function set_freadable(){
+  freadable ||= new Readability(document.cloneNode(true)).parse()
+  return freadable
+}
 function slurp_body(){
-  return minify(new Readability(document.cloneNode(true)).parse().content)
+  set_freadable()
+  return minify(freadable.content)
 }
 
 // ------------ talking with background ------------ //
@@ -295,6 +299,7 @@ class Alma {
     this.wire_alma()
     this.appear()
     this.dom.hover( () => this.hover(), () => this.not_hover() )
+    this.hovered = false
   }
   appear(){
     log('> Fading Alma in')
@@ -343,14 +348,14 @@ class Alma {
 
   hover(){
     log('> Alma is hovered')
-    this.hovered ||= true
+    this.hovered = true
     this.x_button.fadeIn(80)
   }
   
   not_hover(){
     log('> Alma is unhovered')
     this.state_one(60)
-    this.hovered ||= false
+    this.hovered = false
     setTimeout( () =>  { if (!this.hovered) this.x_button.fadeOut(120) }, 1000 )
   } 
 
