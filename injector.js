@@ -291,6 +291,7 @@ class Alma {
     this.menu = this.dom.find('#fready-alma-menu')
     this.x_button = this.dom.find('#fready-alma-x')
     this.save = this.dom.find('#fready-alma-save')
+    this.more = this.dom.find('#fready-alma-more')
     this.wire_alma()
     this.appear()
     this.dom.hover( () => this.hover(), () => this.not_hover() )
@@ -319,6 +320,10 @@ class Alma {
     this.save.html(get_heart(true))
     saveunsave()
   }
+  press_more(){
+    log('Clicked on alma more')
+    showhide()
+  }
   press_read(){
     log('Clicked on alma read')
     toggle_read()
@@ -338,11 +343,16 @@ class Alma {
 
   hover(){
     log('> Alma is hovered')
+    this.hovered ||= true
+    this.x_button.fadeIn(80)
   }
   
   not_hover(){
+    log('> Alma is unhovered')
     this.state_one(60)
-  }
+    this.hovered ||= false
+    setTimeout( () =>  { if (!this.hovered) this.x_button.fadeOut(120) }, 1000 )
+  } 
 
   make_alma(){
     return $(`
@@ -365,6 +375,7 @@ class Alma {
     this.space_to_read.click(() => alma.press_read())
     //this.read.click(() => alma.press_read())
     this.save.click(() => alma.press_save())
+    this.more.click(() => alma.press_more())
     this.x_button.click(() => alma.disappear())
     this.logo.click(() => go_dashboard())
   }
@@ -379,6 +390,7 @@ class Alma {
     this.logo.fadeOut(animation)
     this.eta.fadeOut(animation)
     this.menu.fadeOut(animation)
+    this.x_button.fadeOut(animation)
   }
 }
 // ------------ onload ------------ //
