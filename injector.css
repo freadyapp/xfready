@@ -1,67 +1,10 @@
-/*IMPORT FONTS LIKE GRAMMARLY*/
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap');
-/*
- TODO clean this shit up man
- */
-fready-block div,
-form,
-fieldset,
-legend,
-caption,
-label,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre
-{
-    font-size: 100%;
-    font-weight: normal;
-
-    margin: 0;
-    padding: 0;
-
-    vertical-align: baseline;
-
-    border: 0;
-    outline: 0;
-    background: transparent;
-}
-
-fready-block table
-{
-    border-spacing: 0;
-    border-collapse: collapse;
-}
-
-fready-block th,
-td
-{
-    text-align: left;
-    vertical-align: top;
-}
-
-fready-block img
-{
-    border: 0;
-}
 
 fready-block{
   box-sizing: content-box !important;
-  
-  /* .reset-this { */
-    
-    /* basic modern patch */
-
-/* } */
   user-select:none;
   transition: all .5 ease;
   /* display: none; */
-  font-family: 'Inter', sans-serif !important;
+  font-family: Inter, sans-serif !important;
   /* background: #2B6CCE;  */
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */ 
   border-radius: 10px 0px 7px 13px;
@@ -163,7 +106,7 @@ fready .x-fready-exit{
 
 fready .x-fready-meta{
   font-size: 8px;
-  font-family: 'Inter';
+  font-family: Inter;
   color: rgba(128, 128, 128, 0.63);
 }
 
@@ -235,6 +178,39 @@ fready-x svg{
 .fready-art-locator{
 }
 
+fready-element{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fready-circle-btn{
+    cursor: pointer;
+
+    width: 25px;
+    height: 25px;
+    padding: 2px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: transparent;
+    border-radius: 999969px;
+}
+.fready-circle-btn:hover{
+    background-color: #f2f2f2;
+}
+.fready-circle-btn:hover svg{
+    opacity: 1;
+    fill: #3C3C3C;
+}
+.fready-circle-btn svg{
+
+    fill: #b5b5b5;
+    /*opacity: .5;*/
+}
+
 /*
  FREADY - ALMA
  */
@@ -265,24 +241,35 @@ fready-alma{
     position: absolute;
     margin-top: -39.6px;
     width: 234px;
-    overflow: hidden;
+    /*overflow: hidden;*/
     font-size: 18px;
+    white-space: nowrap;
 }
 
-fready-alma .fready-alma-sector-left{
-    position: absolute;
-    left: 1.8px;
-}
-
-fready-alma .fready-alma-sector-right{
+fready-alma #fready-alma-eta{
+    /*width: 18px;*/
+    /*height: 18px;*/
+    font-family: Reem;
+    margin-left: 7px;
+    margin-right: 18px;
+    color: #2b6cce;
     display: flex;
-    height: 33px;
-    width: 162px;
-    position: absolute;
-    right: 18px;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    left: 16.2px;
 }
+
 fready-alma #fready-alma-menu{
+    display: flex;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-left: 20px;
+    margin-right: 10px;
 }
+
 
 fready-alma .fready-alma-button {
     padding: 0 4.5px;
@@ -297,18 +284,12 @@ fready-alma .fready-alma-button:hover {
     opacity: 1;
 }
 fready-alma #fready-alma-save{
-    width: 81px;
 }
 fready-alma .fready-alma-save-inactive{
     opacity: .8;
 }
 fready-alma .fready-alma-save-active{
     
-}
-fready-alma #fready-alma-read{
-    width: 81px;
-    font-weight: bold;
-    border-left: 1px solid #eee;
 }
 fready-alma #fready-alma-x{
     margin-left: 6,4px;
@@ -317,6 +298,9 @@ fready-alma #fready-alma-x{
     display: flex;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    left: -25px;
+
 }
 fready-alma #fready-alma-x:hover{
     opacity: .8;
@@ -351,19 +335,7 @@ fready-icon{
     justify-content: center;
     align-items: center;
 }
-fready-alma #fready-alma-eta{
-    width: 18px;
-    height: 18px;
-    padding-right: 18px;
-    margin-right: 18px;
-    color: #2b6cce;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-right: 1px solid #eee;
-    white-space: nowrap;
-    left: 16.2px;
-}
+
 fready-alma svg{
     width: 100%;
 }

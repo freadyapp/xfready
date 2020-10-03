@@ -223,9 +223,12 @@ class Fready {
 
 
 function inject_content(tab){
-  chrome.tabs.insertCSS(tab.id, {
-    file: CONTENT_CSS
+  CONTENT_CSS.forEach((sheet) => {
+    chrome.tabs.insertCSS(tab.id, {
+      file: sheet
+    })
   })
+  
   CONTENT_SCRIPTS.forEach((script) => {
     chrome.tabs.executeScript(tab.id, {
       file: script

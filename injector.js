@@ -20,9 +20,9 @@ function is_readable_(doc){
 }
 function calc_words(){
   // todo check if readability document parse is a null and dont get len
-  let rdocument = new Readability(document.cloneNode(true))
+  let rdocument = (new Readability(document.cloneNode(true))).parse()
   if (rdocument == null) return 0
-  return Math.round(((rdocument.parse().length) / 5))
+  return Math.round(((rdocument.length) / 5))
 }
 
 function slurp_body(){
@@ -140,6 +140,10 @@ function go_dashboard(){
 
 function get_save_text(inverse=false){
   return (inverse ? !saved : saved) ? `<span class='fready-alma-save-inactive'>SAVED</span>` : `<span class='fready-alma-save-active'>SAVE</span>`
+}
+
+function get_heart(inverse=false){
+  return (inverse ? !saved : saved) ? filled_love : outlined_love 
 }
 
 function toggle_read(){
@@ -287,7 +291,6 @@ class Alma {
     this.menu = this.dom.find('#fready-alma-menu')
     this.x_button = this.dom.find('#fready-alma-x')
     this.save = this.dom.find('#fready-alma-save')
-    this.read = this.dom.find('#fready-alma-read')
     this.wire_alma()
     this.appear()
     this.dom.hover( () => this.hover(), () => this.not_hover() )
@@ -305,6 +308,7 @@ class Alma {
       setTimeout(() => this.space_to_read.fadeTo(350, .3), 600)
       setTimeout(() => this.space_to_read.fadeTo(400, 1), 1000)
       this.logo.fadeOut(100)
+      this.state_one()
       this.dom.animate({
         width: final_width 
       }, {duration: 450})
@@ -312,7 +316,7 @@ class Alma {
   }
   press_save(){
     log('Clicked on alma save')
-    this.save.html(get_save_text(true))
+    this.save.html(get_heart(true))
     saveunsave()
   }
   press_read(){
@@ -334,7 +338,6 @@ class Alma {
 
   hover(){
     log('> Alma is hovered')
-    this.state_two(60)
   }
   
   not_hover(){
@@ -344,23 +347,23 @@ class Alma {
   make_alma(){
     return $(`
     <fready-alma>
-      <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>
-      <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
-      </fready-element>
-      <fready-element class='fready-alma-sector-left' id='fready-alma-eta'>${calc_eta()}'</fready-element>
+      <fready-element id='fready-alma-x'>${x_button_dark}</fready-element>
 
-      <fready-element class='fready-alma-sector-right' id='fready-alma-space'>${space_to_read}</fready-element>
-      <fready-element class='fready-alma-sector-right' id='fready-alma-menu'>
-        <fready-element class='fready-alma-button' id='fready-alma-save'>${get_save_text()}</fready-element>
-        <fready-element class='fready-alma-button' id='fready-alma-read'>READ</fready-element>
-        <fready-element id='fready-alma-x'>${x_button_dark}</fready-element>
+      <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>
+        <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
+      </fready-element>
+      <fready-element class='fready-circle-btn' id='fready-alma-eta'>${calc_eta()}'</fready-element>
+      <fready-element id='fready-alma-space'>${space_to_read}</fready-element>
+      <fready-element id='fready-alma-menu'>
+        <fready-element class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-alma-more'>${more}</fready-element>
       </fready-element>
     </fready-alma>`)
   }
 
   wire_alma(){
     this.space_to_read.click(() => alma.press_read())
-    this.read.click(() => alma.press_read())
+    //this.read.click(() => alma.press_read())
     this.save.click(() => alma.press_save())
     this.x_button.click(() => alma.disappear())
     this.logo.click(() => go_dashboard())
@@ -369,12 +372,6 @@ class Alma {
     this.space_to_read.fadeIn(animation)
     this.logo.fadeOut(animation)
     this.eta.fadeIn(animation)
-    this.menu.fadeOut(animation)
-  }
-  state_two(animation){
-    this.space_to_read.fadeOut(animation)
-    this.logo.fadeIn(animation)
-    this.eta.fadeOut(animation)
     this.menu.fadeIn(animation)
   }
   fade_out_all(animation=0){

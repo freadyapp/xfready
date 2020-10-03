@@ -22,7 +22,7 @@ const CONTENT_SCRIPTS = [
   "injector.js"
 ]
 
-const CONTENT_CSS = 'injector.css'
+const CONTENT_CSS = [ 'injector.css' ]
 
 function log(txt) {
   if (!DEVELOPMENT) return true
