@@ -7,8 +7,7 @@ let screen = ''
 let saved = false
 let alma = null
 let popper = null
-let readable = new Readability(document.cloneNode(true)).parse()
-let freadable = null
+let freadable = new Readability(document.cloneNode(true)).parse()
 
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
@@ -40,15 +39,12 @@ function parse_domain(){
   return  window.location.hostname
 }
 
-function set_freadable(){
-  if (readable==null) return false 
-  log('>> reseting freadable')
-  log('>>')
-
-  freadable = new Readability(document.cloneNode(true)).parse()
-  log(freadable.content)
-  freadable.domain ||= parse_domain() 
-  freadable.eta = calc_eta(freadable)
+function set_freadable(reload=false){
+  log(`${reload ? ">> parsing doc with readability" : ">> returning freadable"}`)
+  if (freadable==null) return false
+  if (reload) freadable = new Readability(document.cloneNode(true)).parse()
+  freadable.domain ||= parse_domain()
+  freadable.eta ||= calc_eta(freadable)
   return freadable
 }
 function slurp_body(){
@@ -104,7 +100,7 @@ function load_frd(new_frd, cmd=null){
   screen.fadeOut()
   if (cmd == 'read') {
     log('> CMD read - toggling read')
-    toggle_read()
+    toggle_read(new_frd)
   }
   saved = new_frd.saved
   visual_pulse_save()
@@ -158,14 +154,14 @@ function get_heart(inverse=false){
   return (inverse ? !saved : saved) ? filled_love : outlined_love 
 }
 
-function toggle_read(){
+function toggle_read(injecting_frd){
   if (reading) return false;
-  if (frd!=null){
+  if (injecting_frd!=null){
     log('> Injecting lector & starting to read.. Have fun reading!')     
     reading = true
     inject_lector()
   }else{
-    log('> FRD not ready. Requesting read')
+    log('> Reloading FRD - requesting read')
     request('read')
   }
   if (popper){
@@ -498,36 +494,44 @@ if (window != top) {
   log('> got injected in an iframe')
 }
 
+let active = null 
+let last_active = null
 sync_user()
-new Promise((resolve, reject) => {
-  // wait for user
-  (function waitForFoo(){
-      if (user) return resolve()
-      setTimeout(waitForFoo, 30)
-    log(user)
-  })()
-}).then( ()=> {
-  set_freadable()
-  new Promise((resolve, reject) => {
-    // wait for freadable
-    (function waitForFoo(){
-        if (freadable) return resolve();
-        setTimeout(waitForFoo, 30);
-    })()
-  }).then ( () => {
-    if (is_freadable(document)){
-      log('> Fready found a readable document')
-      load_fready()
-      let art_locator = locate_art()
-      log(art_locator)
-      log(` Freadable details:`)
-      table(freadable)
-      art_locator.addClass('fready-art-locator')
-      popper = new Popper()
-      if (true) { // TODO wire actual user settings here
-        alma = new Alma(art_locator)
-        Mousetrap.bind('space', () => {toggle_read(); return false})
-      }
+setInterval( () => { 
+  active = document.location.href
+  if (active != last_active) {
+    last_active = document.location.href
+    new Promise((resolve, reject) => {
+    // wait for user
+      (function waitForFoo(){
+            if (user) return resolve()
+            setTimeout(waitForFoo, 30)
+          log(user)
+        })()
+      }).then( ()=> {
+        set_freadable(true)
+        new Promise((resolve, reject) => {
+          // wait for freadable
+          (function waitForFoo(){
+              if (freadable) return resolve();
+              setTimeout(waitForFoo, 30);
+          })()
+        }).then ( () => {
+          if (is_freadable(document)){
+            log('> Fready found a readable document')
+            load_fready()
+            let art_locator = locate_art()
+            log(art_locator)
+            log(` Freadable details:`)
+            table(freadable)
+            art_locator.addClass('fready-art-locator')
+            popper = new Popper()
+            if (true) { // TODO wire actual user settings here
+              alma = new Alma(art_locator)
+              Mousetrap.bind('space', () => {toggle_read(); return false})
+            }
+          }
+        })
+      })
     }
-  })
-})
+}, 1500);
