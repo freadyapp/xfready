@@ -65,3 +65,11 @@ function idleTimer(options) {
 function inject_alma(alma, art_start){
   $(art_start).prepend(alma) 
 }
+
+function qtippy(element, content){
+  return tippy(element[0], {
+    content: content,
+    arrow: false,
+    appendTo: 'parent'
+  })
+}

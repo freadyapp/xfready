@@ -282,8 +282,8 @@ chrome.browserAction.onClicked.addListener(tab => {
     chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
       if (response) {
         log(`we're good, js has already been ejected --{ ${tab.id} }--`)
-        let fr = x.serve_fready(tab.id, tab.url)
-        fr.reload()
+        //let fr = x.serve_fready(tab.id, tab.url)
+        //fr.reload()
       } else {
         log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
         inject_content(tab)

@@ -1,4 +1,6 @@
 var minifyy = require('html-minifier-terser').minify
+// import tippy from 'tippy.js'
+// import 'tippy.js/dist/tippy.css'
 
 let user = null
 let frd = null
@@ -103,9 +105,6 @@ function load_frd(new_frd, cmd=null){
   if (cmd == 'read') {
     log('> CMD read - toggling read')
     toggle_read()
-  }else{
-    reading = true
-    readexit(false)
   }
 
   if (new_frd.saved){
@@ -123,7 +122,7 @@ function load_frd(new_frd, cmd=null){
 // ------------ front end ------------ //
 function make_frame(){
   return `<fready-x>${x_button}</fready-x><div id='screen-bg'></div>
-          <div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
+  <div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
 }
 function wire_frame(){
   $('fready-x').click( ()=> toggle_exit())
@@ -158,7 +157,7 @@ function go_dashboard(){
 }
 
 function get_save_text(inverse=false){
-  return (inverse ? !saved : saved) ? `<span class='fready-alma-save-inactive'>SAVED</span>` : `<span class='fready-alma-save-active'>SAVE</span>`
+  return (inverse ? !saved : saved) ? `Saved` : `Save`
 }
 
 function get_heart(inverse=false){
@@ -176,6 +175,9 @@ function toggle_read(){
     log('> FRD not ready. Requesting read')
     request('read')
   }
+  if (popper){
+    popper.change_state('reading') 
+  }
 }
 function toggle_exit(){
   log('> Removing lector')
@@ -183,6 +185,9 @@ function toggle_exit(){
   $("#readthisfready").text(`READ`)
   remove_lector()
   reading = false
+  if (popper){
+    popper.change_state('default') 
+  }
 }
 
 function readexit(force=false){
@@ -195,6 +200,12 @@ function readexit(force=false){
 
 function saveunsave(){
   saved = !saved
+  if (popper){
+    popper.do_save()
+  }
+  if (alma){
+    alma.do_save()
+  }
   if (saved){
     visual_save()
     request('save')
@@ -249,12 +260,8 @@ function locate_art(){
 }
 
 function load_fready(){
-  // cleanup() // clean up before starting a new instance
   sync_user()   // sync up with local user before triggering any functions
   sync_frd()    // sync frd with backend
-  // update_eta()
-
-
 }
 // TODO make menu like this
 
@@ -269,11 +276,14 @@ class Popper {
     this.title = this.dom.find("#fready-popper-art-title")
     this.domain = this.dom.find("#fready-popper-art-domain")
     this.eta = this.dom.find("#fready-popper-art-eta")
-
+    this.menu = this.dom.find("#fready-popper-menu")
+    this.exit = this.dom.find("#fready-popper-exit")
+    
     this.read_btn = this.dom.find("#fready-popper-read-btn")
     this.save_btn = this.dom.find("#fready-popper-save-btn")
     this.home_btn = this.dom.find("#fready-popper-home-btn")
     this.wire_popper()
+    this.change_state('default')
   }
 
   make_popper(){
@@ -289,7 +299,10 @@ class Popper {
               <fready-icon class='fready-circle-btn fd-util-l fd-util-darker' id='fready-popper-read-btn'>${read}</fready-icon>
               <fready-vd></fready-vd>
               <a id='fready-popper-home-btn' href='${FREADY_API}' target="_blank"><fready-icon class='fready-circle-btn fd-util-lc fd-util-darker'>${dashboard}</fready-icon></a>
-            </fready-element>
+            </fready-element-l>
+            <fready-element-l id='fready-popper-exit'>
+              <fready-element class='fready-rec-btn'>Exit Freading Mode</fready-element>
+            </fready-element-l>    
         </fready-element>
       </fready-element>
       <fready-element id='fready-popper-logo'>
@@ -311,11 +324,18 @@ class Popper {
     this.save_btn.click(() => {
       popper.press_save()
     })
+    this.exit.click(() => {
+      toggle_exit()
+      change_state('default')
+    })
     $(".freadyhide").click(() => {
       popper.toggle()
     })
     $(window).click(()=> { if (this.showing && !this.hovered) { this.toggle_hide() }})
     this.dom.hover( () => this.hover(), () => this.not_hover() )
+    this.save_btn.tippy = qtippy(this.save_btn, 'Save')
+    this.home_btn.tippy = qtippy(this.home_btn, 'Go to Dashboard')
+    this.read_btn.tippy = qtippy(this.read_btn, 'Read')
   }
 
   hover(){
@@ -343,10 +363,26 @@ class Popper {
   toggle(){
     this.showing ? this.toggle_hide() : this.toggle_show()
   }
+  do_save(){
+    this.save_btn.tippy.setContent(get_save_text(true))
+    this.save_btn.html(get_heart(true))
+  }
   press_save(){
     log('Clicked on popper save')
-    this.save_btn.html(get_heart(true))
     saveunsave()
+  }
+  change_state(state){
+    switch (state){
+      case "reading":
+        this.menu.fadeOut(120) 
+        setTimeout( ()=> this.exit.fadeIn(), 120)
+        setTimeout( () => this.toggle_hide() , 900)
+        break
+      default:
+        this.exit.fadeOut(120) 
+        setTimeout( ()=> this.menu.fadeIn(), 120)    
+        this.exit.fadeOut()
+    }
   }
 }
 class Alma {
@@ -387,9 +423,12 @@ class Alma {
       }, {duration: 450})
     }, 1200)
   }
+  do_save(){
+    this.save.html(get_heart(true))
+    this.save.tippy.setContent(get_save_text(true))
+  }
   press_save(){
     log('Clicked on alma save')
-    this.save.html(get_heart(true))
     saveunsave()
   }
   press_more(){
@@ -449,6 +488,10 @@ class Alma {
     this.more.click(() => alma.press_more())
     this.x_button.click(() => alma.disappear())
     this.logo.click(() => go_dashboard())
+
+    this.save.tippy = qtippy(this.save, 'Save')
+    this.space_to_read.tippy = qtippy(this.space_to_read, 'Read')
+    this.more.tippy = qtippy(this.more, 'More')
   }
   state_one(animation){
     this.space_to_read.fadeIn(animation)
@@ -500,4 +543,3 @@ new Promise((resolve, reject) => {
     }
   })
 })
-

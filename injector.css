@@ -16,7 +16,7 @@ fready-popper{
   font-family: Inter, Hiragino Sans, Helvetica, Arial sans-serif !important;
 
   width: 281px;
-  height: 184px;
+  height: fit-content;
   background: #FFFFFF;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
@@ -50,7 +50,6 @@ fready-popper #fready-popper-art-title{
   font-weight: 300;
   font-style: normal;
   text-align: left;
-  /*max-height: 50px;*/
   margin-bottom: 8px;
 }
 fready-popper #fready-popper-art-domain{
@@ -66,7 +65,7 @@ fready-popper #fready-popper-art-eta{
   margin-right: 25px;
   margin-left: 10px;
 }
-fready-popper #fready-popper-menu{
+fready-popper #fready-popper-menu, fready-popper #fready-popper-exit{
   margin: 10px 0px;
 }
 /*lector stuff*/
@@ -148,6 +147,21 @@ fready-vd{
   border-radius: 9999px;
   box-sizing: border-box;
   /*transform: rotate(90deg);*/
+}
+.fready-rec-btn{
+  cursor: pointer;
+  width: fit-content;
+  white-space: nowrap;
+  padding: 10px 20px;
+  background: #EDEDED;
+  border: 1px solid #E1E1E1;
+  border-radius: 5px;
+  transition: all .2s ease;
+  color: #202020;
+}
+.fready-rec-btn:hover{
+  background: #e1e1e1;
+  color: #000000;
 }
 .fready-circle-btn{
     cursor: pointer;

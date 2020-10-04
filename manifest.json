@@ -27,6 +27,7 @@
         "js": [
             "third_party/jquery.min.js",
             "third_party/minihtml.min.js",
+            "third_party/tippy.min.js",
             "third_party/mousetrap.min.js",
             "third_party/readability.js",
             "third_party/readable.js",
