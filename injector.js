@@ -42,14 +42,17 @@ function parse_domain(){
 
 function set_freadable(){
   if (readable==null) return false 
-  freadable ||=readable
+  log('>> reseting freadable')
+  log('>>')
+
+  freadable = new Readability(document.cloneNode(true)).parse()
+  log(freadable.content)
   freadable.domain ||= parse_domain() 
   freadable.eta = calc_eta(freadable)
   return freadable
 }
 function slurp_body(){
-  set_freadable()
-  return minify(freadable.content)
+  return minify(set_freadable().content)
 }
 
 // ------------ talking with background ------------ //
@@ -63,7 +66,7 @@ function request(request_str, options={}){
   
   log(`> Requesting to ${request_str}`)
   let msg = { request: request_str }
-  if (options.skip_slurp) msg.html = slurp_body() 
+  if (!options.skip_slurp) msg.html = slurp_body() 
 
   chrome.runtime.sendMessage(msg, (response) => {
     log(`> Response: ${response}`)
@@ -160,7 +163,6 @@ function toggle_read(){
   if (frd!=null){
     log('> Injecting lector & starting to read.. Have fun reading!')     
     reading = true
-  
     inject_lector()
   }else{
     log('> FRD not ready. Requesting read')
@@ -491,8 +493,11 @@ class Alma {
   }
 }
 // ------------ onload ------------ //
-// TODO change this to a function that decides if to inject alma or not
- 
+// checking if this is an iframe
+if (window != top) {
+  log('> got injected in an iframe')
+}
+
 sync_user()
 new Promise((resolve, reject) => {
   // wait for user
