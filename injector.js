@@ -1,7 +1,4 @@
 var minifyy = require('html-minifier-terser').minify
-// import tippy from 'tippy.js'
-// import 'tippy.js/dist/tippy.css'
-
 let user = null
 let frd = null
 let frame = $(`<lector></lector>`)
@@ -106,14 +103,8 @@ function load_frd(new_frd, cmd=null){
     log('> CMD read - toggling read')
     toggle_read()
   }
-
-  if (new_frd.saved){
-    visual_save()
-    saved = true
-  }else{
-    visual_unsave()
-    saved = false
-  }
+  saved = new_frd.saved
+  visual_pulse_save()
 
   return new_frd
 }
@@ -128,13 +119,13 @@ function wire_frame(){
   $('fready-x').click( ()=> toggle_exit())
 }
 
-function visual_save(){
-  $("#savethisfready").addClass("x-fready-inactive")
-  $("#savethisfready").html(`SAVED`)
-}
-function visual_unsave(){
-  $("#savethisfready").removeClass("x-fready-inactive")
-  $("#savethisfready").html(`SAVE`)
+function visual_pulse_save(inverse){
+  if (popper){
+    popper.do_save(inverse)
+  }
+  if (alma){
+    alma.do_save(inverse)
+  }
 }
 
 function remove_lector(){
@@ -200,17 +191,10 @@ function readexit(force=false){
 
 function saveunsave(){
   saved = !saved
-  if (popper){
-    popper.do_save()
-  }
-  if (alma){
-    alma.do_save()
-  }
+  visual_pulse_save()
   if (saved){
-    visual_save()
     request('save')
   }else{
-    visual_unsave()
     request('unsave', {skip_slurp: true})
   }
 }
@@ -363,9 +347,9 @@ class Popper {
   toggle(){
     this.showing ? this.toggle_hide() : this.toggle_show()
   }
-  do_save(){
-    this.save_btn.tippy.setContent(get_save_text(true))
-    this.save_btn.html(get_heart(true))
+  do_save(inverse=false){
+    this.save_btn.tippy.setContent(get_save_text(inverse))
+    this.save_btn.html(get_heart(inverse))
   }
   press_save(){
     log('Clicked on popper save')
@@ -376,7 +360,6 @@ class Popper {
       case "reading":
         this.menu.fadeOut(120) 
         setTimeout( ()=> this.exit.fadeIn(), 120)
-        setTimeout( () => this.toggle_hide() , 900)
         break
       default:
         this.exit.fadeOut(120) 
@@ -423,9 +406,9 @@ class Alma {
       }, {duration: 450})
     }, 1200)
   }
-  do_save(){
-    this.save.html(get_heart(true))
-    this.save.tippy.setContent(get_save_text(true))
+  do_save(inverse=false){
+    this.save.html(get_heart(inverse))
+    this.save.tippy.setContent(get_save_text(inverse))
   }
   press_save(){
     log('Clicked on alma save')
