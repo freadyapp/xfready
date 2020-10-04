@@ -280,21 +280,22 @@ class Popper {
    return $(`
      <fready-popper>
       <fready-element id='fready-popper-art'>
-        <fready-element class='fready-circle-btn' id='fready-popper-art-teta'>${calc_eta()}'</fready-element>
-        <fready-element class='fready-title' id='fready-popper-art-title'>${calc_title()}</fready-element>
-        <fready-element class='fready-meta' id='fready-popper-art-domain'>${parse_domain()}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-popper-art-eta'>${calc_eta()}'</fready-element>
+        <fready-element id='fready-popper-art-info'>
+          <fready-text class='fready-title' id='fready-popper-art-title'>${calc_title()}</fready-text>
+          <fready-text class='fready-meta' id='fready-popper-art-domain'>${parse_domain()}</fready-text>
+            <fready-element-l id='fready-popper-menu'>
+              <fready-icon class='fready-circle-btn fd-util-l fd-util-darker' id='fready-popper-save-btn'>${get_heart()}</fready-icon>
+              <fready-icon class='fready-circle-btn fd-util-l fd-util-darker' id='fready-popper-read-btn'>${read}</fready-icon>
+              <fready-vd></fready-vd>
+              <a id='fready-popper-home-btn' href='${FREADY_API}' target="_blank"><fready-icon class='fready-circle-btn fd-util-lc fd-util-darker'>${dashboard}</fready-icon></a>
+            </fready-element>
+        </fready-element>
       </fready-element>
-      <fready-element id='fready-alma-menu'>
-        <fready-element class='fready-circle-btn' id='fready-popper-save-btn'>${get_heart()}</fready-element>
-        <fready-element class='fready-circle-btn' id='fready-popper-read-btn'>${more}</fready-element>
-        <fready-vd></fready-vd>
-        <fready-element class='fready-circle-btn' id='fready-popper-read-btn'>${dashboard}</fready-element>
-      </fready-element><fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>
       <fready-element id='fready-popper-logo'>
         <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
       </fready-element>
-      
-      </fready-popper>
+    </fready-popper>
     `) 
   }
   wire_popper(){
@@ -313,7 +314,7 @@ class Popper {
     $(".freadyhide").click(() => {
       popper.toggle()
     })
-    $(window).click(()=> {!this.hovered &&  this.toggle_hide()})
+    $(window).click(()=> { if (this.showing && !this.hovered) { this.toggle_hide() }})
     this.dom.hover( () => this.hover(), () => this.not_hover() )
   }
 
@@ -325,7 +326,7 @@ class Popper {
   }
   toggle_show(){
     if (this.showing) return false
-    this.showing = true
+    setTimeout( () => this.showing = true, 50 )
     this.dom 
       .css({'filter': 'saturate(1)'})
       .slideDown(70)
@@ -429,15 +430,14 @@ class Alma {
     return $(`
     <fready-alma>
       <fready-element id='fready-alma-x'>${x_button_dark}</fready-element>
-
       <fready-element class='fready-alma-sector-left' id='fready-alma-logo'>
         <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
       </fready-element>
       <fready-element class='fready-circle-btn' id='fready-alma-eta'>${calc_eta()}'</fready-element>
       <fready-element id='fready-alma-space'>${space_to_read}</fready-element>
       <fready-element id='fready-alma-menu'>
-        <fready-element class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-element>
-        <fready-element class='fready-circle-btn' id='fready-alma-more'>${more}</fready-element>
+        <fready-icon class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-icon>
+        <fready-icon class='fready-circle-btn' id='fready-alma-more'>${more}</fready-icon>
       </fready-element>
     </fready-alma>`)
   }

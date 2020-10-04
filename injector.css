@@ -1,3 +1,14 @@
+fready-popper,
+fready-popper::before,
+fready-popper::after,
+fready-popper *
+fready-popper *::before,
+fready-popper *::after {
+    all: revert;
+    box-sizing: content-box !important;
+    --webkit-box-sizing: content-box !important;
+}
+
 fready-popper{
   box-sizing: content-box !important;
   user-select:none;
@@ -8,47 +19,80 @@ fready-popper{
   height: 184px;
   background: #FFFFFF;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  border-radius: 5px;
 
   position:fixed; 
   top:10px; 
   right:5px; 
   padding:10px; 
   z-index:96969696969; 
-  backdrop-filter: blur(10px);
-  margin: 20px;
-  margin-top: 0;
-  background: #fff;
-  text-align: center;
   font-size: 17px;
-  
 }
 
+fready-popper #fready-popper-art{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: baseline;
+  align-content: stretch;
+}
+
+fready-popper #fready-popper-art-info{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-items: flex-start;
+  margin-bottom: 10px;
+}
+fready-popper #fready-popper-art-title{
+  font-size: 18px;
+  font-weight: 300;
+  font-style: normal;
+  text-align: left;
+  /*max-height: 50px;*/
+  margin-bottom: 8px;
+}
+fready-popper #fready-popper-art-domain{
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 600;
+  color: #9F9F9F;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+}
+fready-popper #fready-popper-art-eta{
+  margin-right: 25px;
+  margin-left: 10px;
+}
+fready-popper #fready-popper-menu{
+  margin: 10px 0px;
+}
 /*lector stuff*/
 lector {
-    width: 100vw;
-    height: 100vh;
-    background-color: #303030;
-    background-color: transparent;
-    position: fixed;
-    top: 0;
-    z-index: 9999999999999999999;
+  width: 100vw;
+  height: 100vh;
+  background-color: #303030;
+  background-color: transparent;
+  position: fixed;
+  top: 0;
+  z-index: 9999999999999999999;
     left: 0;
 }
 lector #screen-bg{
-    z-index: -1;
-    background-color: #404040;
-    width: 100%;
-    height: 100%;
-    position: absolute;
+  z-index: -1;
+  background-color: #404040;
+  width: 100%;
+  height: 100%;
+  position: absolute;
 }
 lector #freadysscreen{
-    z-index: 2;
-    position: absolute;
-    width: 100%;
-    height: 100%;
+  z-index: 2;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
-
 
 fready-x{
   box-sizing: content-box !important;
@@ -82,19 +126,34 @@ fready-x svg{
 
 .fready-art-locator{
 }
-
 fready-element{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+fready-element-l{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: stretch;
 }
 
+fready-vd{
+  width: 0;
+  height: 1em;
+  margin: 0 9px;
+  border: .5px solid #D3D3D3;
+  border-radius: 9999px;
+  box-sizing: border-box;
+  /*transform: rotate(90deg);*/
+}
 .fready-circle-btn{
     cursor: pointer;
-
-    width: 25px;
-    height: 25px;
-    padding: 2px;
+    width: 22px;
+    height: 22px;
+    padding: 3px;
 
     display: flex;
     justify-content: center;
@@ -104,16 +163,31 @@ fready-element{
     border-radius: 999969px;
 }
 .fready-circle-btn:hover{
-    background-color: #f2f2f2;
+  background-color: #fcfcfc;
 }
 .fready-circle-btn:hover svg{
-    opacity: 1;
-    fill: #3C3C3C;
+  opacity: 1;
+  fill: #3C3C3C;
 }
 .fready-circle-btn svg{
+  fill: #b5b5b5;
+}
+.fd-util-l{
+  width: 30px;
+  height: 30px;
+}
 
-    fill: #b5b5b5;
-    /*opacity: .5;*/
+.fd-util-lc{
+  width: 25px;
+  height: 25px;
+  padding:5px
+}
+.fd-util-darker svg{
+  fill: #5D5D5D;
+}
+.fd-util-darker:hover svg{
+  opacity: 1;
+  fill: #101010;
 }
 
 /*
@@ -151,7 +225,7 @@ fready-alma{
     white-space: nowrap;
 }
 
-fready-alma #fready-alma-eta{
+fready-popper #fready-popper-art-eta, fready-alma #fready-alma-eta{
     /*width: 18px;*/
     /*height: 18px;*/
     font-family: Reem Kufi, Inter, Hiragino Sans, Helvetica, Arial sans-serif !important;
@@ -175,7 +249,6 @@ fready-alma #fready-alma-menu{
     margin-right: 10px;
 }
 
-
 fready-alma .fready-alma-button {
     padding: 0 4.5px;
     margin: 0 1.8px;
@@ -198,7 +271,7 @@ fready-alma .fready-alma-save-active{
 }
 fready-alma #fready-alma-x{
     margin-left: 6,4px;
-    opacity: .4;
+    opacity: .7;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -211,7 +284,7 @@ fready-alma #fready-alma-x{
     border-radius: 9996px;
 }
 fready-alma #fready-alma-x:hover{
-    opacity: .8;
+    opacity: 1;
 }
 
 fready-alma #fready-alma-space{
@@ -244,7 +317,10 @@ fready-icon{
     align-items: center;
 }
 
-fready-alma svg{
-    width: 100%;
+fready-icon svg{
+    max-height: 90% !important; 
+    width: 90% !important;
+    height: auto;
+    /*width: auto;*/
 }
 
