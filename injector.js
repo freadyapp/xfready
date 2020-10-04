@@ -264,6 +264,7 @@ class Popper {
     this.dom.fadeOut(0)
     this.dom.insertAfter(document.body)
     this.showing = false
+    this.hovered = false
 
     this.title = this.dom.find("#fready-popper-art-title")
     this.domain = this.dom.find("#fready-popper-art-domain")
@@ -281,13 +282,13 @@ class Popper {
       <fready-element id='fready-popper-art'>
         <fready-element class='fready-circle-btn' id='fready-popper-art-teta'>${calc_eta()}'</fready-element>
         <fready-element class='fready-title' id='fready-popper-art-title'>${calc_title()}</fready-element>
-        <fready-element class='fready-meta' id='fready-popper-art-domain'>${parse_domain()}'</fready-element>
+        <fready-element class='fready-meta' id='fready-popper-art-domain'>${parse_domain()}</fready-element>
       </fready-element>
       <fready-element id='fready-alma-menu'>
-        <fready-element class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-element>
-        <fready-element class='fready-circle-btn' id='fready-alma-more'>${more}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-popper-save-btn'>${get_heart()}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-popper-read-btn'>${more}</fready-element>
         <fready-vd></fready-vd>
-        <fready-element class='fready-circle-btn' id='fready-alma-more'>${dashboard}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-popper-read-btn'>${dashboard}</fready-element>
       </fready-element><fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>
       <fready-element id='fready-popper-logo'>
         <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
@@ -307,14 +308,23 @@ class Popper {
       readexit()
     })
     this.save_btn.click(() => {
-      saveunsave()
+      popper.press_save()
     })
     $(".freadyhide").click(() => {
       popper.toggle()
-    })   
+    })
+    $(window).click(()=> {!this.hovered &&  this.toggle_hide()})
+    this.dom.hover( () => this.hover(), () => this.not_hover() )
   }
 
+  hover(){
+    this.hovered = true
+  }
+  not_hover(){
+    this.hovered = false
+  }
   toggle_show(){
+    if (this.showing) return false
     this.showing = true
     this.dom 
       .css({'filter': 'saturate(1)'})
@@ -322,6 +332,7 @@ class Popper {
       .fadeTo(10, 1)
   }
   toggle_hide(){
+    if (!this.showing) return false
     this.showing = false
     this.dom
       .css({ 'filter': 'saturate(0)' })
@@ -330,6 +341,11 @@ class Popper {
   } 
   toggle(){
     this.showing ? this.toggle_hide() : this.toggle_show()
+  }
+  press_save(){
+    log('Clicked on popper save')
+    this.save_btn.html(get_heart(true))
+    saveunsave()
   }
 }
 class Alma {
