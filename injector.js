@@ -160,13 +160,15 @@ function toggle_read(injecting_frd){
     log('> Injecting lector & starting to read.. Have fun reading!')     
     reading = true
     inject_lector()
+    if (popper){
+      popper.change_state('reading') 
+      setTimeout( () => popper.toggle_hide(), 920)
+    } 
   }else{
     log('> Reloading FRD - requesting read')
     request('read')
   }
-  if (popper){
-    popper.change_state('reading') 
-  }
+  
 }
 function toggle_exit(){
   log('> Removing lector')
@@ -354,6 +356,7 @@ class Popper {
     saveunsave()
   }
   change_state(state){
+    log('chaning state to' + state)
     switch (state){
       case "reading":
         this.menu.fadeOut(120) 
@@ -386,23 +389,32 @@ class Alma {
     this.hovered = false
   }
   appear(){
-    log('> Fading Alma in')
-    let final_width = this.dom.width()
-    this.dom.css({'width': this.dom.height()})
-    this.fade_out_all()
-    this.logo.fadeIn(0)
-    this.dom.fadeTo(450, 1, 'swing')
-    setTimeout( () => {
-      this.eta.fadeIn(100)
-      setTimeout(() => this.space_to_read.fadeIn(100), 300)
-      setTimeout(() => this.space_to_read.fadeTo(350, .3), 600)
-      setTimeout(() => this.space_to_read.fadeTo(400, 1), 1000)
-      this.logo.fadeOut(100)
-      this.state_one()
-      this.dom.animate({
-        width: final_width 
-      }, {duration: 450})
-    }, 1200)
+    let alma = this
+
+    new Promise((resolve, reject) => {
+        (function wait_to_scroll_into_view(){
+            if (is_in_view(alma.dom)) return resolve();
+            setTimeout(wait_to_scroll_into_view, 30);
+        })()
+    }).then( () => {
+      log('> Fading Alma in')
+      let final_width = this.dom.width()
+      this.dom.css({'width': this.dom.height()})
+      this.fade_out_all()
+      this.logo.fadeIn(0)
+      this.dom.fadeTo(450, 1, 'swing')
+      setTimeout( () => {
+        this.eta.fadeIn(100)
+        setTimeout(() => this.space_to_read.fadeIn(100), 300)
+        setTimeout(() => this.space_to_read.fadeTo(350, .3), 600)
+        setTimeout(() => this.space_to_read.fadeTo(400, 1), 1000)
+        this.logo.fadeOut(100)
+        this.state_one()
+        this.dom.animate({
+          width: final_width 
+        }, {duration: 450})
+      }, 1200)
+    })
   }
   do_save(inverse=false){
     this.save.html(get_heart(inverse))
@@ -464,7 +476,6 @@ class Alma {
 
   wire_alma(){
     this.space_to_read.click(() => alma.press_read())
-    //this.read.click(() => alma.press_read())
     this.save.click(() => alma.press_save())
     this.more.click(() => alma.press_more())
     this.x_button.click(() => alma.disappear())
@@ -496,42 +507,47 @@ if (window != top) {
 
 let active = null 
 let last_active = null
-sync_user()
+
 setInterval( () => { 
   active = document.location.href
   if (active != last_active) {
     last_active = document.location.href
+    
+    // sync & wait for user
+    sync_user()
     new Promise((resolve, reject) => {
-    // wait for user
       (function waitForFoo(){
-            if (user) return resolve()
-            setTimeout(waitForFoo, 30)
+          if (user) return resolve()
+          setTimeout(waitForFoo, 30)
           log(user)
+      })()
+
+    }).then( ()=> {
+
+      // make new freadable & wait for it to laod
+      set_freadable(true)
+      new Promise((resolve, reject) => {
+        (function waitForFoo(){
+            if (freadable) return resolve();
+            setTimeout(waitForFoo, 30);
         })()
-      }).then( ()=> {
-        set_freadable(true)
-        new Promise((resolve, reject) => {
-          // wait for freadable
-          (function waitForFoo(){
-              if (freadable) return resolve();
-              setTimeout(waitForFoo, 30);
-          })()
-        }).then ( () => {
-          if (is_freadable(document)){
-            log('> Fready found a readable document')
-            load_fready()
-            let art_locator = locate_art()
-            log(art_locator)
-            log(` Freadable details:`)
-            table(freadable)
-            art_locator.addClass('fready-art-locator')
-            popper = new Popper()
-            if (true) { // TODO wire actual user settings here
-              alma = new Alma(art_locator)
-              Mousetrap.bind('space', () => {toggle_read(); return false})
-            }
+      }).then( () => {
+        if (is_freadable(document)){
+          log('> Fready found a readable document')
+          load_fready()
+          let art_locator = locate_art()
+          log(art_locator)
+          log(` Freadable details:`)
+          table(freadable)
+          art_locator.addClass('fready-art-locator')
+          popper = new Popper()
+          if (true) { // TODO wire actual user settings here
+            alma = new Alma(art_locator)
+            Mousetrap.bind('space', () => {toggle_read(); return false})
           }
-        })
+        }
       })
-    }
-}, 1500);
+    })
+  }
+}, 500)
+
