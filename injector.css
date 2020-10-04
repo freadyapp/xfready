@@ -1,28 +1,30 @@
-fready-block{
+fready-popper{
   box-sizing: content-box !important;
   user-select:none;
   transition: all .5 ease;
-  /* display: none; */
   font-family: Inter, Hiragino Sans, Helvetica, Arial sans-serif !important;
-  /* background: #2B6CCE;  */
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */ 
-  border-radius: 10px 0px 7px 13px;
-  width: 200px; 
-  height: 50px; 
+
+  width: 281px;
+  height: 184px;
+  background: #FFFFFF;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+
   position:fixed; 
-  top:0; 
-  right:0; 
+  top:10px; 
+  right:5px; 
   padding:10px; 
   z-index:96969696969; 
   backdrop-filter: blur(10px);
   margin: 20px;
   margin-top: 0;
-  background: #eceeee;
-  box-shadow: -6px 6px 15px rgba(0, 0, 0, 0.35);
+  background: #fff;
   text-align: center;
-  font-size: 17px !important;
+  font-size: 17px;
+  
 }
 
+/*lector stuff*/
 lector {
     width: 100vw;
     height: 100vh;
@@ -45,102 +47,6 @@ lector #freadysscreen{
     position: absolute;
     width: 100%;
     height: 100%;
-}
-
-fready a{
-  all: initial;
-  cursor: pointer;
-}
-
-fready-button {
-  transition: all .5 ease;
-  all: revert;
-  font-family: Roboto, Inter, Helvetica, Arial;
-  letter-spacing: 1.4px;
-  background-color: #2B6CCE;
-  border-radius: 4px;
-  box-shadow: -0px 0px 5px rgba(0, 0, 0, 0.2);
-  padding: 8px 10px;
-  color: whitesmoke;
-  cursor: pointer;
-  margin-bottom: 1px;
-  /* line-height: 20px; */
-}
-
-fready-button:hover{
-  background-color: #2773e4;
-  box-shadow: -0px 0px 8px rgba(0, 0, 0, 0.30);
-  color: white;
-}
-
-fready .x-fready-ghost{
-  background-color: #ececec !important;
-  color: #404044;
-
-}
-fready .x-fready-ghost:hover{
-  background-color: rgb(255, 255, 255);
-  color: black;
-}
-
-fready .x-fready-inline{
-  display: inline-block;
-}
-
-fready .x-fready-inactive{
-  background-color: transparent !important;
-  box-shadow: none;
-  color: gray !important;
-}
-
-fready .x-fready-inactive:hover{
-  color: #2B6CCE !important;
-  /* border: none !important; */
-}
-
-fready .x-fready-exit{
-  background-color: transparent;
-  color: #2B6CCE;
-}
-
-fready .x-fready-meta{
-  font-size: 8px;
-  font-family: Inter;
-  color: rgba(128, 128, 128, 0.63);
-}
-
-fready #freadyhidebutton{
-  display: block;
-  cursor: pointer;
-  position: absolute;
-  bottom: -12px;
-  right: 3px;
-  padding: 5px;
-  width: 22px;
-  opacity: 0;
-}
-
-fready #freadyhidebigbutton{
-  z-index: -1;
-  background-color: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* cursor: n-resize; */
-}
-
-fready #fready_home{
-  /* display: none; */
-  /* margin-top: 10px; */
-  position: relative !important;
-  width: 15px !important;
-  height: 14px !important;
-  padding: 4px !important;
-  border-right: 2px solid gainsboro !important;
-  margin-right: 3px !important;
-  cursor: pointer;
 }
 
 

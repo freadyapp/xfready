@@ -6,8 +6,9 @@ let frame = $(`<lector></lector>`)
 let reading = false
 let screen = ''
 let saved = false
-let show = POPUP_DEFAULT
 let alma = null
+let popper = null
+let readable = new Readability(document.cloneNode(true)).parse()
 let freadable = null
 
 function minify(html){
@@ -19,13 +20,32 @@ function is_freadable(doc){
 function is_readable_(doc){
   return isProbablyReaderable(doc)
 }
-function calc_words(){
-  set_freadable()
-  if (freadable == null) return 0
-  return Math.ceil(((freadable.length) / 5))
+function calc_words(cfreadable=null){
+  cfreadable ||= set_freadable()
+  if (cfreadable == null) return 0
+  return Math.ceil(((cfreadable.length) / 5))
 }
+function calc_eta(cfreadable=null){
+  cfreadable ||= set_freadable()
+  let wpm_pref = user ? (JSON.parse(user.prefs).wpm || 250) : 250
+  let eta = Math.floor(calc_words(cfreadable) / wpm_pref) 
+  freadable.eta = eta
+  return eta
+}
+
+function calc_title(){
+  set_freadable()
+  return freadable.title 
+}
+function parse_domain(){
+  return  window.location.hostname
+}
+
 function set_freadable(){
-  freadable ||= new Readability(document.cloneNode(true)).parse()
+  if (readable==null) return false 
+  freadable ||=readable
+  freadable.domain ||= parse_domain() 
+  freadable.eta = calc_eta(freadable)
   return freadable
 }
 function slurp_body(){
@@ -53,11 +73,6 @@ function request(request_str, options={}){
 
 function update_eta(){
   chrome.runtime.sendMessage( { request: 'eta', eta: calc_words() })
-}
-
-function calc_eta(){
-  if (user == null) return -1 
-  return Math.floor(calc_words() / (JSON.parse(user.prefs).wpm || 250)) 
 }
 
 function sync_user(){
@@ -189,30 +204,6 @@ function saveunsave(){
   }
 }
 
-function toggle_show(){
-  show = true
-  $('#fready_ui')
-    .css({'filter': 'saturate(1)'})
-    .slideDown(70)
-    .fadeTo(10, 1)
-}
-function toggle_hide(){
-  show = false
-  $("#fready_ui")
-    .css({ 'filter': 'saturate(0)' })
-    .fadeTo(200, 0.5)
-    .slideUp(100)
-}
-  
-function showhide(){
-  show = !show
-  if (show){
-    toggle_show()
-  }else{
-    toggle_hide()
-  }
-}
-
 function cleanup(){
   $('fready').remove()
   $('lector').remove()
@@ -222,7 +213,7 @@ function cleanup(){
 // ------------ listeners ------------ //
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.trigger == "click") showhide()
+  if (request.trigger == "click") popper.toggle()
   if (request.user){
     sync_user(request.user)
   }
@@ -261,27 +252,86 @@ function load_fready(){
   // cleanup() // clean up before starting a new instance
   sync_user()   // sync up with local user before triggering any functions
   sync_frd()    // sync frd with backend
-  $(ui).insertAfter(document.body)
   // update_eta()
 
-  if (!show){
-    $("#fready_ui")
-    .fadeTo(0, 0.5)
-    .css({ 'filter': 'saturate(0)' })
-    .slideUp(0)
-  }
 
-  $("#readthisfready").click(() => {
-    readexit()
-  })
-  $("#savethisfready").click(() => {
-    saveunsave()
-  })
-  $(".freadyhide").click(() => {
-    showhide()
-  })
 }
 // TODO make menu like this
+
+class Popper {
+  constructor(dom){
+    this.dom = this.make_popper()
+    this.dom.fadeOut(0)
+    this.dom.insertAfter(document.body)
+    this.showing = false
+
+    this.title = this.dom.find("#fready-popper-art-title")
+    this.domain = this.dom.find("#fready-popper-art-domain")
+    this.eta = this.dom.find("#fready-popper-art-eta")
+
+    this.read_btn = this.dom.find("#fready-popper-read-btn")
+    this.save_btn = this.dom.find("#fready-popper-save-btn")
+    this.home_btn = this.dom.find("#fready-popper-home-btn")
+    this.wire_popper()
+  }
+
+  make_popper(){
+   return $(`
+     <fready-popper>
+      <fready-element id='fready-popper-art'>
+        <fready-element class='fready-circle-btn' id='fready-popper-art-teta'>${calc_eta()}'</fready-element>
+        <fready-element class='fready-title' id='fready-popper-art-title'>${calc_title()}</fready-element>
+        <fready-element class='fready-meta' id='fready-popper-art-domain'>${parse_domain()}'</fready-element>
+      </fready-element>
+      <fready-element id='fready-alma-menu'>
+        <fready-element class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-element>
+        <fready-element class='fready-circle-btn' id='fready-alma-more'>${more}</fready-element>
+        <fready-vd></fready-vd>
+        <fready-element class='fready-circle-btn' id='fready-alma-more'>${dashboard}</fready-element>
+      </fready-element><fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>
+      <fready-element id='fready-popper-logo'>
+        <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
+      </fready-element>
+      
+      </fready-popper>
+    `) 
+  }
+  wire_popper(){
+   if (!this.showing){
+     this.dom 
+      .fadeTo(0, 0.5)
+      .css({ 'filter': 'saturate(0)' })
+      .slideUp(0)
+    }
+    this.read_btn.click(() => {
+      readexit()
+    })
+    this.save_btn.click(() => {
+      saveunsave()
+    })
+    $(".freadyhide").click(() => {
+      popper.toggle()
+    })   
+  }
+
+  toggle_show(){
+    this.showing = true
+    this.dom 
+      .css({'filter': 'saturate(1)'})
+      .slideDown(70)
+      .fadeTo(10, 1)
+  }
+  toggle_hide(){
+    this.showing = false
+    this.dom
+      .css({ 'filter': 'saturate(0)' })
+      .fadeTo(200, 0.5)
+      .slideUp(100)
+  } 
+  toggle(){
+    this.showing ? this.toggle_hide() : this.toggle_show()
+  }
+}
 class Alma {
   constructor(art_locator){
     log('> Creating & Injecting Alma')
@@ -327,7 +377,7 @@ class Alma {
   }
   press_more(){
     log('Clicked on alma more')
-    showhide()
+    popper.toggle()
   }
   press_read(){
     log('Clicked on alma read')
@@ -400,15 +450,38 @@ class Alma {
 }
 // ------------ onload ------------ //
 // TODO change this to a function that decides if to inject alma or not
-if (is_freadable(document)){
-  log('> Fready found a readable document')
-  load_fready()
-  setTimeout( () => {
-    let art_locator = locate_art()
-    log(art_locator)
-    art_locator.addClass('fready-art-locator')
-    alma = new Alma(art_locator)
-    Mousetrap.bind('space', () => {toggle_read(); return false})
-  }, CHILL_OUT_TIME)
-}
+ 
+sync_user()
+new Promise((resolve, reject) => {
+  // wait for user
+  (function waitForFoo(){
+      if (user) return resolve()
+      setTimeout(waitForFoo, 30)
+    log(user)
+  })()
+}).then( ()=> {
+  set_freadable()
+  new Promise((resolve, reject) => {
+    // wait for freadable
+    (function waitForFoo(){
+        if (freadable) return resolve();
+        setTimeout(waitForFoo, 30);
+    })()
+  }).then ( () => {
+    if (is_freadable(document)){
+      log('> Fready found a readable document')
+      load_fready()
+      let art_locator = locate_art()
+      log(art_locator)
+      log(` Freadable details:`)
+      table(freadable)
+      art_locator.addClass('fready-art-locator')
+      popper = new Popper()
+      if (true) { // TODO wire actual user settings here
+        alma = new Alma(art_locator)
+        Mousetrap.bind('space', () => {toggle_read(); return false})
+      }
+    }
+  })
+})
 

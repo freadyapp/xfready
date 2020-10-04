@@ -6,6 +6,11 @@ const home = `<svg xmlns="http://www.w3.org/2000/svg" height="23" viewBox="0 0 2
     d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" />
   </svg>`
 
+const dashboard = `
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 8.48012C0 9.03241 0.447715 9.48012 1 9.48012H6.5841C7.13638 9.48012 7.5841 9.03241 7.5841 8.48012V0.999999C7.5841 0.447714 7.13638 0 6.5841 0H1C0.447716 0 0 0.447715 0 1V8.48012ZM0 16.0642C0 16.6165 0.447715 17.0642 1 17.0642H6.5841C7.13638 17.0642 7.5841 16.6165 7.5841 16.0642V12.3761C7.5841 11.8239 7.13638 11.3761 6.5841 11.3761H1C0.447716 11.3761 0 11.8239 0 12.3761V16.0642ZM9.48012 16.0642C9.48012 16.6165 9.92784 17.0642 10.4801 17.0642H16.0642C16.6165 17.0642 17.0642 16.6165 17.0642 16.0642V8.5841C17.0642 8.03181 16.6165 7.5841 16.0642 7.5841H10.4801C9.92784 7.5841 9.48012 8.03181 9.48012 8.5841V16.0642ZM10.4801 0C9.92784 0 9.48012 0.447715 9.48012 1V4.68807C9.48012 5.24036 9.92784 5.68807 10.4801 5.68807H16.0642C16.6165 5.68807 17.0642 5.24036 17.0642 4.68807V0.999999C17.0642 0.447714 16.6165 0 16.0642 0H10.4801Z" />
+</svg>
+`
 const expand_less = `
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -15,19 +20,6 @@ const expand_less = `
 </svg>
 `
 const x_button = `<svg xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 24 24" fill = "white" width = "18px" height = "18px" > <path d="M0 0h24v24H0V0z" fill="none" /><path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z" /></svg>`
-const ui = `
-<fready>
-  <fready-block class='fready_div' id='fready_ui'>
-    <a href='${FREADY_API}' target="_blank"><fready-icon id="fready_home">${home}</fready-icon></a>
-    <fready-button class='x-fready-button x-fready-inline x-fready-ghost' id='savethisfready'>SAVE</fready-button>
-    <fready-button class='x-fready-button x-fready-inline' id='readthisfready'>READ</fready-button>
-    <a href='${FREADY_API}' id='loggedinlink' target="_blank"><fready-p class="x-fready-meta"> Logged into Fready: <strong id='username'> _ </strong></fready-p></a>
-    <a href='${FREADY_API}/users/sign_in' id='loggedoutlink' style='display:none;' target="_blank"><br><fready-p class="x-fready-meta"> <strong id='username'> LOG IN | SIGN UP </strong></fready-p></a>
-    <fready-div class='freadyhide' id='freadyhidebutton'> ${expand_less} </fready-div>
-    <fready-div class='freadyhide' id='freadyhidebigbutton'></fready-div>
-  </fready-block>
-</fready>
-`
 const fready_logo = `<?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 28 37" xmlns="http://www.w3.org/2000/svg">
 <path d="m24.671 24.925-8.3084-19.199c-0.0079 0.13416-0.04 0.26579-0.0948 0.3885-0.1068 0.22303-0.2935 0.39774-0.5231 0.48946-0.0031 0.03255-0.0031 0.06533 0 0.09789l0.0703 0.13154c0.2081 0 1.291 0.27531 0.9759 0.7097-0.1224 0.17131-0.517 0.22943-0.6944 0.2539-0.3765 0.03421-0.7557 0.02085-1.1288-0.03977-0.7107-0.03802-1.3877-0.31507-1.9211-0.78618-0.1483-0.18483-0.2292-0.41463-0.2295-0.65158l-11.747 24.693c-0.05392 0.1167-0.084269 0.2428-0.089302 0.3713-0.005034 0.1284 0.015347 0.2565 0.059972 0.377 0.04463 0.1206 0.11262 0.2311 0.20007 0.3252 0.08745 0.0942 0.19264 0.1702 0.30954 0.2236 0.20443 0.099 0.43694 0.1239 0.6577 0.0703l21.833-6.1303c0.2461-0.0726 0.4539-0.2389 0.5787-0.4632 0.1247-0.2243 0.1564-0.4886 0.0881-0.736-0.0089-0.0427-0.0212-0.0846-0.0367-0.1254z" fill="#EFEEEE"/>
