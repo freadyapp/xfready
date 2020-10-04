@@ -19,12 +19,12 @@ function is_readable_(doc){
   return isProbablyReaderable(doc)
 }
 function calc_words(cfreadable=null){
-  cfreadable ||= set_freadable()
+  cfreadable = cfreadable || set_freadable()
   if (cfreadable == null) return 0
   return Math.ceil(((cfreadable.length) / 5))
 }
 function calc_eta(cfreadable=null){
-  cfreadable ||= set_freadable()
+  cfreadable = cfreadable || set_freadable()
   let wpm_pref = user ? (JSON.parse(user.prefs).wpm || 250) : 250
   let eta = Math.floor(calc_words(cfreadable) / wpm_pref) 
   freadable.eta = eta
@@ -43,8 +43,8 @@ function set_freadable(reload=false){
   log(`${reload ? ">> parsing doc with readability" : ">> returning freadable"}`)
   if (freadable==null) return false
   if (reload) freadable = new Readability(document.cloneNode(true)).parse()
-  freadable.domain ||= parse_domain()
-  freadable.eta ||= calc_eta(freadable)
+  freadable.domain = freadable.domain || parse_domain()
+  freadable.eta = freadable.domain || calc_eta(freadable)
   return freadable
 }
 function slurp_body(){
