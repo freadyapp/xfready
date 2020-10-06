@@ -373,7 +373,8 @@ class Alma {
   constructor(art_locator){
     log('> Creating & Injecting Alma')
     this.dom = this.make_alma()
-    inject_alma(this.dom, art_locator)
+    this.art_start = art_locator
+    this.inject_alma()
     this.dom.fadeTo(0, .01)
     // declaring some shortcuts
     this.space_to_read = this.dom.find('#fready-alma-space')
@@ -473,6 +474,20 @@ class Alma {
       </fready-element>
     </fready-alma>`)
   }
+  pos_alma(){
+    let y = Math.max(200, ($(this.art_start).offset().top - 50))
+    let x = Math.max(10, $(this.art_start).offset().left)
+    this.dom.css( {
+      'position':'absolute',
+      'top': `${y}px`,
+      'left': `${x}px`
+    })
+  }
+  inject_alma(){
+    //onDocumnetResize
+    this.pos_alma(this.art_start)
+    $(document.body).append(this.dom) 
+  }
 
   wire_alma(){
     this.space_to_read.click(() => alma.press_read())
@@ -484,6 +499,7 @@ class Alma {
     this.save.tippy = qtippy(this.save, 'Save')
     this.space_to_read.tippy = qtippy(this.space_to_read, 'Read')
     this.more.tippy = qtippy(this.more, 'More')
+    addEventListener( "resize", () => this.pos_alma())
   }
   state_one(animation){
     this.space_to_read.fadeIn(animation)

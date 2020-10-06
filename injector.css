@@ -231,12 +231,10 @@ fready-alma{
     justify-content: center;
     align-items: center;
     
-    position: absolute;
-    margin-top: -39.6px;
-    width: 234px;
     /*overflow: hidden;*/
     font-size: 18px;
     white-space: nowrap;
+    z-index: 99999999999999999999 !important;
 }
 
 fready-popper #fready-popper-art-eta, fready-alma #fready-alma-eta{
