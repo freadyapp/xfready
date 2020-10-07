@@ -339,7 +339,7 @@ class Popper {
   }
 
   wire_settings(){
-    settings.wire('alma', this, user.settings.alma, 'fready-alma')
+    settings.wire('alma', this, user.settings.alma!=0, 'fready-alma')
   }
   wire_popper(){
    if (!this.showing){
