@@ -68,6 +68,17 @@ fready-popper #fready-popper-art-eta{
 fready-popper #fready-popper-menu, fready-popper #fready-popper-exit{
   margin: 10px 0px;
 }
+fready-popper #fready-popper-bottom-sector{
+  height: 50px;
+  width: 90%;
+  white-space: nowrap;
+  margin: auto;
+}
+fready-popper #fready-popper-logo{
+  width: 50px;
+}
+fready-popper #fready-popper-settings{
+}
 /*lector stuff*/
 lector {
   width: 100vw;
@@ -85,6 +96,7 @@ lector #screen-bg{
   width: 100%;
   height: 100%;
   position: absolute;
+  opacity: .9;
 }
 lector #freadysscreen{
   z-index: 2;
@@ -138,7 +150,11 @@ fready-element-l{
   align-items: center;
   align-content: stretch;
 }
-
+fready-sector{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 fready-vd{
   width: 0;
   height: 1em;
@@ -202,6 +218,29 @@ fready-vd{
 .fd-util-darker:hover svg{
   opacity: 1;
   fill: #101010;
+}
+.fd-util-setting{
+  font-size: 13px;
+  color: gray;
+  font-weight: 300;
+}
+.fd-util-option{
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 300;
+  color: gray;
+  padding: 3px;
+  border-bottom: 1px solid transparent;
+  margin: 0px 3px;
+}
+.fd-util-option:hover{
+  color: #202020;
+  border-bottom: 1px solid #2b6cce80;
+}
+.fd-util-select{
+  color: #101010;
+  border-bottom: 1px solid #2b6cce;
+  font-weight: 600;
 }
 
 /*

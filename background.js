@@ -18,7 +18,8 @@ class xFreadyUser{
         table(data)
         this.name = data['name']
         this.email = data['email']
-        this.prefs = data['prefs']
+        this.prefs = JSON.parse(data['prefs'])
+        this.settings = JSON.parse(data['settings'])
         this.api_key = data['key']
       },
       error: (e) => { 
@@ -39,6 +40,27 @@ class xFreadyUser{
           if (response) table(response)
         })
       })
+    })
+  }
+  set(req){
+    console.table(req)
+    $.ajax({
+      url: `${FREADY_API}/xapi/user`,
+      type: 'POST',
+      crossDomain: true,
+      data: {
+        "meta": req,
+        "api_key": this.api_key
+      },
+      success: (data) => {
+        log(data)
+      },
+      error: (e) => { 
+        console.log('Fready failed to update a setting')
+        log(e)
+      }
+    }).then( () => {
+      this.sync()
     })
   }
 }
@@ -124,7 +146,7 @@ class Fready {
     }
   }
 
-  save(doc, cb = (() => { this.send() }), hard_save = true){
+  save(content, cb = (() => { this.send() }), hard_save = true){
     this.saved = hard_save
     $.ajax({
       url: `${FREADY_API}/links.json`,
@@ -132,9 +154,10 @@ class Fready {
       crossDomain: true,
       dataType: 'text json',
       data: {
-        "link":  doc ? {
+        "link":  content ? {
           "loc": this.url,
-          "doc": doc
+          "doc": content.doc,
+          "title": content.title
         }:{
           "loc": this.url
         },
@@ -177,7 +200,7 @@ class Fready {
 
   update_eta(chars){
     log(`updating eta badge for tab with url ${this.url}, with ${chars} characters.`)
-    let mins = (Math.round( chars / get_pref('wpm', DEF_PREF.wpm ) ))
+    let mins = (Math.round( chars / (u.prefs.wpm || DEF_PREF.wpm) ))
     this.render_badge(Math.round(mins).toString() + "'")
     return mins
   }
@@ -254,12 +277,12 @@ chrome.runtime.onMessage.addListener(
     }
     if (request.request == "save"){
       log(`request to save ${sender.tab.url}`)
-      x.freadies[sender.tab.url].save(request.html)
+      x.freadies[sender.tab.url].save(request.content)
       sendResponse({ msg: "saved article"})
     }
     if (request.request == "read"){
       log(`request to read ${sender.tab.url}`)
-      x.freadies[sender.tab.url].read(request.html)
+      x.freadies[sender.tab.url].read(request.content)
       sendResponse({ msg: "reading article.."})
     }
     if (request.request == "unsave"){
@@ -272,6 +295,10 @@ chrome.runtime.onMessage.addListener(
       x.freadies[sender.tab.url].update_eta(request.eta)
       sendResponse({ msg: 'thanks'})
     }
+  if (request.set){
+    u.set(request.set) 
+    sendResponse({ user: 'updating'})
+  }
 })
 
 chrome.browserAction.onClicked.addListener(tab => {

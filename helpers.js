@@ -13,6 +13,10 @@ function check_url(url){
   }))
 }
 
+function jdig(json, key){
+  // digs a key from a json
+  return JSON.parse(json)[key] || null
+}
 function get_pref(pref, def){
   return JSON.parse(u.prefs)[pref] ? JSON.parse(u.prefs)[pref] : def
 }
@@ -80,3 +84,4 @@ function is_in_view(elem){
 
   return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
+

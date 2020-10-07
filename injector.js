@@ -7,6 +7,7 @@ let screen = ''
 let saved = false
 let alma = null
 let popper = null
+let settings = null
 let freadable = new Readability(document.cloneNode(true)).parse()
 
 function minify(html){
@@ -25,7 +26,7 @@ function calc_words(cfreadable=null){
 }
 function calc_eta(cfreadable=null){
   cfreadable = cfreadable || set_freadable()
-  let wpm_pref = user ? (JSON.parse(user.prefs).wpm || 250) : 250
+  let wpm_pref = user ? (user.prefs.wpm || 250) : 250
   let eta = Math.floor(calc_words(cfreadable) / wpm_pref) 
   freadable.eta = eta
   return eta
@@ -62,7 +63,7 @@ function request(request_str, options={}){
   
   log(`> Requesting to ${request_str}`)
   let msg = { request: request_str }
-  if (!options.skip_slurp) msg.html = slurp_body() 
+  if (!options.skip_slurp) msg.content = { doc: slurp_body(), title: calc_title() }
 
   chrome.runtime.sendMessage(msg, (response) => {
     log(`> Response: ${response}`)
@@ -75,7 +76,9 @@ function update_eta(){
 
 function sync_user(){
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
+    log('>> syncing user')
     user = data.freadyslovelyuser
+    table(user)
     if (user.name) {
       $("#loggedinlink").show()
       $("#loggedoutlink").hide()
@@ -249,6 +252,38 @@ function load_fready(){
 }
 // TODO make menu like this
 
+class Settings {
+  constructor(){
+  }
+  wire(setting, parent, def, ident=null){
+    log(`wiring ${setting} to ${parent.dom}`)
+    let on = parent.dom.find(`#fd-set-${setting}-1`)
+    let off = parent.dom.find(`#fd-set-${setting}-0`)
+    let elements = {ident: ident, on: on, off: off}
+    on.click( ()=> { settings.set(setting, 1, elements )}) 
+    off.click( ()=> { settings.set(setting, 0, elements )}) 
+    this.set(setting, def, elements)
+  }
+  send_bg(setting, val){
+    let req = {}
+    req[setting] = val
+    chrome.runtime.sendMessage({ set: req } , (response) => {log(response)})
+  }
+  set(setting, val, elements={}){
+    log(`⚙️  Setting ${setting} to ${val}`)
+    //sendMesage blah bl;ah
+    if (val==1){
+      elements.on.addClass('fd-util-select')
+      elements.off.removeClass('fd-util-select')
+      elements.ident && $(elements.ident).fadeIn()
+    }else{
+      elements.off.addClass('fd-util-select')
+      elements.on.removeClass('fd-util-select')
+      elements.ident && $(elements.ident).fadeOut()
+    }
+    this.send_bg(setting, val)
+  }
+}
 class Popper {
   constructor(dom){
     this.dom = this.make_popper()
@@ -266,8 +301,10 @@ class Popper {
     this.read_btn = this.dom.find("#fready-popper-read-btn")
     this.save_btn = this.dom.find("#fready-popper-save-btn")
     this.home_btn = this.dom.find("#fready-popper-home-btn")
+    
     this.wire_popper()
     this.change_state('default')
+    this.wire_settings()
   }
 
   make_popper(){
@@ -289,11 +326,20 @@ class Popper {
             </fready-element-l>    
         </fready-element>
       </fready-element>
-      <fready-element id='fready-popper-logo'>
-        <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
-      </fready-element>
+      <fready-sector id='fready-popper-bottom-sector'>
+        <fready-element id='fready-popper-logo'>
+          <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_full_logo}</fready-icon></a>
+        </fready-element>
+        <fready-element id='fready-popper-settings' class='fd-util-setting'>
+          Show on websites: <span id='fd-set-alma-1' class='fd-util-option fd-util-select'>On</span> <span id='fd-set-alma-0' class='fd-util-option'>Off</span>
+        </fready-element>
+      </fready-sector>
     </fready-popper>
     `) 
+  }
+
+  wire_settings(){
+    settings.wire('alma', this, user.settings.alma, 'fready-alma')
   }
   wire_popper(){
    if (!this.showing){
@@ -475,8 +521,8 @@ class Alma {
     </fready-alma>`)
   }
   pos_alma(){
-    let y = Math.max(200, ($(this.art_start).offset().top - 50))
-    let x = Math.max(10, $(this.art_start).offset().left)
+    let y = Math.max(30, ($(this.art_start).offset().top - 50))
+    let x = Math.max(30, $(this.art_start).offset().left)
     this.dom.css( {
       'position':'absolute',
       'top': `${y}px`,
@@ -556,11 +602,10 @@ setInterval( () => {
           log(` Freadable details:`)
           table(freadable)
           art_locator.addClass('fready-art-locator')
+          settings = new Settings()
+          alma = new Alma(art_locator)
           popper = new Popper()
-          if (true) { // TODO wire actual user settings here
-            alma = new Alma(art_locator)
-            Mousetrap.bind('space', () => {toggle_read(); return false})
-          }
+          Mousetrap.bind('space', () => {if (user.settings.alma != 0) {toggle_read(); return false}})
         }
       })
     })
