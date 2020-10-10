@@ -9,6 +9,7 @@ let alma = null
 let popper = null
 let settings = null
 let freadable = new Readability(document.cloneNode(true)).parse()
+let currently_injecting_lector = false;
 
 function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
@@ -91,7 +92,7 @@ function sync_user(){
 }
 
 function load_frd(new_frd, cmd=null){
-  if (!(new_frd && new_frd.id && user)) return false
+  if (currently_injecting_lector || !(new_frd && new_frd.id && user)) return false
 
   log(`> Loading new FRD - command: ${cmd}`)
   table(new_frd)
@@ -114,7 +115,7 @@ function load_frd(new_frd, cmd=null){
 
 // ------------ front end ------------ //
 function make_frame(){
-  return `<fready-x>${x_button}</fready-x><div id='screen-bg'></div>
+  return `<fready-x>${x_button}</fready-x><div id='screen-bg'> </div><div id='fready-loader'>${loader}</div>
   <div id="freadysscreen"><iframe onload="this.contentWindow.focus();" src="${FREADY_API}/lector?art=${frd.id}&api_key=${user.api_key}" width=100% height=100% style="border: none;"></iframe></div>`
 }
 function wire_frame(){
@@ -135,14 +136,15 @@ function remove_lector(){
 }
 
 function inject_lector(){
-  $("#readthisfready").addClass("x-fready-exit")
-  $("#readthisfready").text(`EXIT`)
-  //$(document.body).fadeOut(210)
+  currently_injecting_lector = true 
+  screen.fadeIn()
   $(frame).insertAfter(document.body)
   wire_frame()
   $(frame).fadeTo(0, 0.01)
   $(frame).fadeTo(400, 1)
-  setTimeout( () => screen.fadeIn(), 350)
+  $(frame).find("#screen-bg").fadeTo(200, .7)
+  //setTimeout( () => { screen.fadeIn(); }, 150)
+  setTimeout( () => { $(frame).find("#screen-bg").fadeTo(400, .99);currently_injecting_lector = false }, 1200)
 }
 
 function go_dashboard(){
@@ -158,8 +160,9 @@ function get_heart(inverse=false){
 }
 
 function toggle_read(injecting_frd){
-  if (reading) return false;
-  if (injecting_frd!=null){
+  if (currently_injecting_lector || reading) return false;
+
+  if (injecting_frd!=null){    
     log('> Injecting lector & starting to read.. Have fun reading!')     
     reading = true
     inject_lector()
@@ -175,8 +178,6 @@ function toggle_read(injecting_frd){
 }
 function toggle_exit(){
   log('> Removing lector')
-  $("#readthisfready").removeClass("x-fready-exit")
-  $("#readthisfready").text(`READ`)
   remove_lector()
   reading = false
   if (popper){
@@ -350,14 +351,14 @@ class Popper {
       .slideUp(0)
     }
     this.read_btn.click(() => {
-      readexit()
+      toggle_read()
     })
     this.save_btn.click(() => {
       popper.press_save()
     })
     this.exit.click(() => {
       toggle_exit()
-      change_state('default')
+      popper.change_state('default')
     })
     $(".freadyhide").click(() => {
       popper.toggle()
