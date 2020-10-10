@@ -149,11 +149,11 @@ class FreadyInstance extends FreadyConnectable{
     this.url = url
   }
 
-  read(doc){
+  read(req={}){
     if (this.saved){
       this.send('read')
     }else{
-      this.save(doc, (
+      this.save({content: req.content, meta: req.meta}, (
         ()=>{
           this.send('read')
         }
@@ -161,18 +161,22 @@ class FreadyInstance extends FreadyConnectable{
     }
   }
 
-  save(content, cb = (() => { this.send() }), hard_save = true){
+  save(req={}, cb = (() => { this.send() }), hard_save = true){
     this.saved = hard_save
     
+    log("Saving table:")
+    table(req)
+
     this.ajax(
       'links.json', 
       'POST', 
-      { "link":  content ? {
+      { "link":  req.content ? {
         "loc": this.url,
-        "doc": content.doc,
-        "title": content.title
+        "doc": req.content.doc,
+        "title": req.content.title
       } : { "loc": this.url },
-        "save": hard_save
+        "save": hard_save,
+        "meta": req.meta || {}
       },
       (data) => { 
         log("successfully recieved new frd")
@@ -182,12 +186,12 @@ class FreadyInstance extends FreadyConnectable{
       }
     ) 
   }
-  unsave(){
+  unsave(meta){
     this.saved = false
     this.ajax(
       'unsave_link',
       'GET',
-      { "loc": this.url },
+      { "loc": this.url, "meta": meta },
       (data) => this.send()
     )
   }
@@ -267,6 +271,7 @@ chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
 })
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+  let meta = request.meta || {}
   if (request.frd){
     frd = controller.serve_fready(sender.tab.id, sender.tab.url)
     frd.update_eta(request.frd.eta)
@@ -275,17 +280,17 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     return
   }
   if (request.request == "save"){
-    controller.freadies[sender.tab.url].save(request.content)
+    controller.freadies[sender.tab.url].save({ content: request.content, meta: meta })
     sendResponse({ msg: "saved article"})
     return
   }
   if (request.request == "read"){
-    controller.freadies[sender.tab.url].read(request.content)
+    controller.freadies[sender.tab.url].read({ content: request.content, meta: meta })
     sendResponse({ msg: "reading article.."})
     return
   }
   if (request.request == "unsave"){
-    controller.freadies[sender.tab.url].unsave()
+    controller.freadies[sender.tab.url].unsave(meta)
     sendResponse({ msg: "unsaved article"})
     return
   }

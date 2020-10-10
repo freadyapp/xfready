@@ -65,6 +65,7 @@ function request(request_str, options={}){
   log(`> Requesting to ${request_str}`)
   let msg = { request: request_str }
   if (!options.skip_slurp) msg.content = { doc: slurp_body(), title: calc_title() }
+  if ( options.source ) msg.meta = { trigger: options.source }
 
   chrome.runtime.sendMessage(msg, (response) => {
     log(`> Response: ${response}`)
@@ -159,7 +160,7 @@ function get_heart(inverse=false){
   return (inverse ? !saved : saved) ? filled_love : outlined_love 
 }
 
-function toggle_read(injecting_frd){
+function toggle_read(injecting_frd, options={}){
   if (currently_injecting_lector || reading) return false;
 
   if (injecting_frd!=null){    
@@ -172,7 +173,7 @@ function toggle_read(injecting_frd){
     } 
   }else{
     log('> Reloading FRD - requesting read')
-    request('read')
+    request('read', options) 
   }
   
 }
@@ -185,13 +186,6 @@ function toggle_exit(){
   }
 }
 
-function readexit(force=false){
-  if (!reading || force){
-    toggle_read()
-  }else{
-    toggle_exit()
-  }
-}
 
 function saveunsave(){
   saved = !saved
@@ -351,7 +345,7 @@ class Popper {
       .slideUp(0)
     }
     this.read_btn.click(() => {
-      toggle_read()
+      toggle_read(null, { source: "popper" } )
     })
     this.save_btn.click(() => {
       popper.press_save()
@@ -479,7 +473,7 @@ class Alma {
   }
   press_read(){
     log('Clicked on alma read')
-    toggle_read()
+    toggle_read(null, { source: "alma" })
   }
   disappear(){
     log('yeeting alma') 
@@ -538,6 +532,7 @@ class Alma {
   }
 
   wire_alma(){
+    
     this.space_to_read.click(() => alma.press_read())
     this.save.click(() => alma.press_save())
     this.more.click(() => alma.press_more())
@@ -608,7 +603,7 @@ function reload_fready(){
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()
-          Mousetrap.bind('space', () => {if (user.settings.alma != 0) {toggle_read(); return false}})
+          Mousetrap.bind('space', () => {if (user.settings.alma != 0) {toggle_read(null, { source: "space" }); return false}})
         }
       })
     })
