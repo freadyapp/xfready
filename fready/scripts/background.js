@@ -1,11 +1,40 @@
 let controller = null
 let user = null
 
-
-class User{
+class FreadyConnectable {
   constructor(){
+  }
+
+  ajax(url, meth, data, success=(()=>{}), error=(()=>{}), type, ignore_check=false){
+    if (ignore_check || !(user && user.api_key)) return false
+    log(`AJAXing.. /${url}`)
+    table(data)
+
+    data["api_key"] = this.api_key 
+    $.ajax({
+      url: `${FREADY_API}/${url}`,
+      type: meth || 'GET',
+      crossDomain: true,
+      dataType: type || 'text json',
+      data: data,
+      success: (data) => {
+        table(data)
+        success(data)
+      },
+      error: (data) => {
+        table(data)
+        error(data)
+      }
+    }) 
+  }
+}
+
+class User extends FreadyConnectable{
+  constructor(){
+    super()
     this.sync()
   }
+
   sync() {
     log('syncing user')
     $.ajax({
@@ -40,19 +69,14 @@ class User{
     })
   }
   set(req){
-    $.ajax({
-      url: `${FREADY_API}/xapi/user`,
-      type: 'POST',
-      crossDomain: true,
-      data: {
-        "meta": req,
-        "api_key": this.api_key
-      },
-      success: (data) => { log(data) },
-      error: (e) => { log(e) }
-    }).then( () => {
-      this.sync()
-    })
+    this.ajax(
+      'xapi/user', 
+      'POST', 
+      { "meta": req }, 
+      (data) => { 
+        this.sync() 
+      }
+    )
   }
 }
 
@@ -94,8 +118,9 @@ class Controller{
   }
 }
 
-class FreadyInstance {
+class FreadyInstance extends FreadyConnectable{
   constructor(url, tab){
+    super()
     this.url = decodeURIComponent(url)
     this.tabs = [tab]
   }
@@ -106,7 +131,6 @@ class FreadyInstance {
     controller.remove_fready(this.url)
   }
   add_tab(tab) {
-
     if (!(this.tabs.includes(tab))){
       log(`adding new tab [${tab}] in ${this.url}`)
       this.tabs.push(tab)
@@ -139,48 +163,33 @@ class FreadyInstance {
 
   save(content, cb = (() => { this.send() }), hard_save = true){
     this.saved = hard_save
-    $.ajax({
-      url: `${FREADY_API}/links.json`,
-      type: 'POST',
-      crossDomain: true,
-      dataType: 'text json',
-      data: {
-        "link":  content ? {
-          "loc": this.url,
-          "doc": content.doc,
-          "title": content.title
-        }:{
-          "loc": this.url
-        },
-        "save": hard_save,
-        "api_key": this.api_key
+    
+    this.ajax(
+      'links.json', 
+      'POST', 
+      { "link":  content ? {
+        "loc": this.url,
+        "doc": content.doc,
+        "title": content.title
+      } : { "loc": this.url },
+        "save": hard_save
       },
-      success: (data) => {
-        log('succesfully recieved new frd')
+      (data) => { 
+        log("successfully recieved new frd")
         table(data.link)
         this.id = data.link.id
         cb()
-      },
-      error: (data) => {
-        log('error when recieved new frd')
-        table(data)
       }
-    })
+    ) 
   }
   unsave(){
     this.saved = false
-    $.ajax({
-      url: `${FREADY_API}/unsave_link`,
-      type: "GET",
-      crossDomain: true,
-      error: (e) => { log(e) },
-      data: {
-        "loc": this.url,
-        "api_key": this.api_key
-      }
-    }).then(() => {
-      this.send()
-    })
+    this.ajax(
+      'unsave_link',
+      'GET',
+      { "loc": this.url },
+      (data) => this.send()
+    )
   }
   render_badge(txt){
     this.tabs.forEach(tab => {
@@ -197,15 +206,12 @@ class FreadyInstance {
   }
 
   reload(){
-    $.ajax({
-      url: `${FREADY_API}/find_link`,
-      type: 'GET',
-      crossDomain: true,
-      data: {
-        "loc": this.url,
-        "api_key": this.api_key
-      },
-      success: (data) => {
+    this.ajax(
+      'find_link', 
+      'GET', 
+      { "loc": this.url },
+      (data) => { 
+        //success
         if (data != null){
           this.saved = data.saved
           this.id = data.id
@@ -215,15 +221,16 @@ class FreadyInstance {
           this.id = null
           log(`[ article got yeeted, reseting ] - [ ID => ${this.id} ]`)
         }
+        this.send()
       },
-      error: (data) => {
+      (data) => {
         table('error checking if the article is loaded', data)
         this.saved = false
+        this.send()
       }
-    }).then(()=>{
-      this.send()
-    })
+    )
   }
+
   send(command=null){
     this.tabs.forEach( (tab)=>{
       chrome.tabs.sendMessage(tab, { frd: this, cmd: command }, (response) => {
