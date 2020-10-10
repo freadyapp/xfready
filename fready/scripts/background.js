@@ -1,10 +1,8 @@
-// ------------ lets vars consts ------------ //
-// TODO clean up this
-let x = null
-let u = null
+let controller = null
+let user = null
 
-// ------------ classes ------------ //
-class xFreadyUser{
+
+class User{
   constructor(){
     this.sync()
   }
@@ -23,7 +21,6 @@ class xFreadyUser{
         this.api_key = data['key']
       },
       error: (e) => { 
-        console.log('Fready failed to sync with your account.')
         table('failed to sync user data', e)
       }
     }).then( () => {
@@ -34,7 +31,7 @@ class xFreadyUser{
     })
   }
   sync_tabs(){
-    Object.entries(x.freadies).forEach(([url, fready]) => {
+    Object.entries(controller.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab, { user: this }, (response) => {
           if (response) table(response)
@@ -43,7 +40,6 @@ class xFreadyUser{
     })
   }
   set(req){
-    console.table(req)
     $.ajax({
       url: `${FREADY_API}/xapi/user`,
       type: 'POST',
@@ -52,29 +48,24 @@ class xFreadyUser{
         "meta": req,
         "api_key": this.api_key
       },
-      success: (data) => {
-        log(data)
-      },
-      error: (e) => { 
-        console.log('Fready failed to update a setting')
-        log(e)
-      }
+      success: (data) => { log(data) },
+      error: (e) => { log(e) }
     }).then( () => {
       this.sync()
     })
   }
 }
 
-class xFreadyController{
+class Controller{
   constructor(){
     this.freadies = {}
   }
   reload(flush){
-    u.sync()
+    user.sync()
     if (flush) this.freadies = {}
   }
   get api_key(){
-    return u.api_key
+    return user.api_key
   }
   check_if_fready_(tab_id, url){
     return this.freadies[url] != null && this.freadies[url].tabs.includes(tab_id)
@@ -86,7 +77,7 @@ class xFreadyController{
       return this.freadies[url]
     }
     log(`fready for ${url} didnt exist so creating a new one`)
-    this.freadies[url] = new Fready(url, tab_id)
+    this.freadies[url] = new FreadyInstance(url, tab_id)
     return this.freadies[url]
   }
   remove_view(tab_id) {
@@ -103,16 +94,16 @@ class xFreadyController{
   }
 }
 
-class Fready {
+class FreadyInstance {
   constructor(url, tab){
     this.url = decodeURIComponent(url)
     this.tabs = [tab]
   }
   get api_key() {
-    return x.api_key
+    return controller.api_key
   }
   self_destruct(){
-    x.remove_fready(this.url)
+    controller.remove_fready(this.url)
   }
   add_tab(tab) {
 
@@ -200,7 +191,7 @@ class Fready {
 
   update_eta(chars){
     log(`updating eta badge for tab with url ${this.url}, with ${chars} characters.`)
-    let mins = (Math.round( chars / (u.prefs.wpm || DEF_PREF.wpm) ))
+    let mins = (Math.round( chars / (user.prefs.wpm || DEF_PREF.wpm) ))
     this.render_badge(Math.round(mins).toString() + "'")
     return mins
   }
@@ -260,66 +251,68 @@ function inject_content(tab){
 }
 
 
-// ------------ listeners ------------ //
+/*
+ *      Chrome Listeners
+ */
+
 chrome.tabs.onRemoved.addListener( (tabId, changeInfo, tab) => {
-  x.remove_view(tabId)
+  controller.remove_view(tabId)
 })
 
-chrome.runtime.onMessage.addListener(
-  (request, sender, sendResponse) => {
-    table(request)
-    if (request.frd){
-      log(`request to create/update ${sender.tab.url}`)
-      frd = x.serve_fready(sender.tab.id, sender.tab.url)
-      frd.update_eta(request.frd.eta)
-      frd.reload()
-      sendResponse({ msg: "recieved frd" })
-    }
-    if (request.request == "save"){
-      log(`request to save ${sender.tab.url}`)
-      x.freadies[sender.tab.url].save(request.content)
-      sendResponse({ msg: "saved article"})
-    }
-    if (request.request == "read"){
-      log(`request to read ${sender.tab.url}`)
-      x.freadies[sender.tab.url].read(request.content)
-      sendResponse({ msg: "reading article.."})
-    }
-    if (request.request == "unsave"){
-      log(`request to unsave ${sender.tab.url}`)
-      x.freadies[sender.tab.url].unsave()
-      sendResponse({ msg: "unsaved article "})
-    }
-    if (request.request == 'eta'){
-      log('updating the badge for tab')
-      x.freadies[sender.tab.url].update_eta(request.eta)
-      sendResponse({ msg: 'thanks'})
-    }
-  if (request.set){
-    u.set(request.set) 
-    sendResponse({ user: 'updating'})
+chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+  if (request.frd){
+    frd = controller.serve_fready(sender.tab.id, sender.tab.url)
+    frd.update_eta(request.frd.eta)
+    frd.reload()
+    sendResponse({ msg: "recieved frd" })
+    return
   }
+  if (request.request == "save"){
+    controller.freadies[sender.tab.url].save(request.content)
+    sendResponse({ msg: "saved article"})
+    return
+  }
+  if (request.request == "read"){
+    controller.freadies[sender.tab.url].read(request.content)
+    sendResponse({ msg: "reading article.."})
+    return
+  }
+  if (request.request == "unsave"){
+    controller.freadies[sender.tab.url].unsave()
+    sendResponse({ msg: "unsaved article"})
+    return
+  }
+  if (request.request == 'eta'){
+    controller.freadies[sender.tab.url].update_eta(request.eta)
+    sendResponse({ msg: 'thanks'})
+    return
+  }
+  if (request.set){
+    user.set(request.set) 
+    sendResponse({ user: 'updating'})
+    return
+  }
+
+  sendResponse({ msg: "Invalid Request" })
 })
 
 chrome.browserAction.onClicked.addListener(tab => {
   log(`xfready icon was clicked on ${tab.id} (${tab.url}), syncing user`)
-  u.sync()
+  user.sync()
 
   chrome.tabs.query({ active: true, currentWindow: true }, () => {
     chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
       if (response) {
-        log(`we're good, js has already been ejected --{ ${tab.id} }--`)
-        //let fr = x.serve_fready(tab.id, tab.url)
-        //fr.reload()
+        // Click on Fready icon
       } else {
-        log(`we're NOT good, should be INJECTING JS 💉 -{ ${tab.id} }-`)
+        log(`INJECTING JS 💉 -{ ${tab.id} }-`)
         inject_content(tab)
       }
     })
   })
 })
 
-// ------------ one time things ------------ //
+
 chrome.runtime.onInstalled.addListener(() => {
   log('!FREADY-HAS-BEEN-INSTALLED!')
   chrome.tabs.create({
@@ -327,6 +320,11 @@ chrome.runtime.onInstalled.addListener(() => {
   })
 })
 
-// ------------ start the script ------------ //
-u = new xFreadyUser
-x = new xFreadyController
+
+/*
+ *      Start the background script up
+ */
+
+user = new User
+controller = new Controller
+

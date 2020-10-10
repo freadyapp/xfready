@@ -11,9 +11,9 @@
     "background": {
       "scripts": [
         "third_party/jquery.min.js",
-        "helpers.js",
-        "dev.js",
-        "background.js"
+        "fready/scripts/helpers.js",
+        "fready/scripts/dev.js",
+        "fready/scripts/background.js"
       ]
     },
     "content_scripts": [{
@@ -31,23 +31,20 @@
             "third_party/mousetrap.min.js",
             "third_party/readability.js",
             "third_party/readable.js",
-            "dev.js",
-            "assets/ui.js",
-            "helpers.js",
-            "injector.js"
+            "fready/scripts/dev.js",
+            "fready/assets/ui.svgs.js",
+            "fready/scripts/helpers.js",
+            "fready/scripts/injector.js"
         ],
         "css": [
-          "injector.css"
+          "fready/styles/injector.css"
         ]
     }],
     "browser_action": {
       "default_icon": {
-        "16": "assets/logos/fready_logo_16.png",
-        "32": "assets/logos/fready_logo_32.png",
-        "48": "assets/logos/fready_logo_48.png",
-        "64": "assets/logos/fready_logo_64.png",
-        "128": "assets/logos/fready_logo_128.png",
-        "256": "assets/logos/fready_logo_256.png"
+        "16": "fready/assets/logos/16.png",
+        "48": "fready/assets/logos/48.png",
+        "128": "fready/assets/logos/128.png"
       }
     },
     "commands": {
@@ -60,12 +57,9 @@
       }
     },
     "icons": {
-      "16": "assets/logos/fready_logo_16.png",
-      "32": "assets/logos/fready_logo_32.png",
-      "48": "assets/logos/fready_logo_48.png",
-      "64": "assets/logos/fready_logo_64.png",
-      "128": "assets/logos/fready_logo_128.png",
-      "256": "assets/logos/fready_logo_256.png"
+      "16": "fready/assets/logos/16.png",
+      "48": "fready/assets/logos/48.png",
+      "128": "fready/assets/logos/128.png"
     },
     "manifest_version": 2
   }
