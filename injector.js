@@ -203,9 +203,9 @@ function saveunsave(){
 }
 
 function cleanup(){
-  $('fready').remove()
-  $('lector').remove()
-  $(document.body).fadeIn()
+  log('🧹 cleaning up other fready instances')
+  let freadys_trash = ['fready-alma', 'lector', 'fready-popper']
+  freadys_trash.forEach( trash => $(trash).remove() ) 
 }
 
 // ------------ listeners ------------ //
@@ -226,7 +226,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 })
 
 function locate_art(){
-  // TODO improve this
+
   log("> attempting to locate art") 
   let first_p = $(slurp_body()).find('p').text()
   let text_identifier = first_p.slice(0, Math.min(first_p.length, ART_LOCATOR_LEN))
@@ -249,6 +249,7 @@ function locate_art(){
 function load_fready(){
   sync_user()   // sync up with local user before triggering any functions
   sync_frd()    // sync frd with backend
+  cleanup()
 }
 // TODO make menu like this
 
@@ -570,7 +571,7 @@ if (window != top) {
 let active = null 
 let last_active = null
 
-setInterval( () => { 
+function reload_fready(){
   active = document.location.href
   if (active != last_active) {
     last_active = document.location.href
@@ -588,6 +589,7 @@ setInterval( () => {
 
       // make new freadable & wait for it to laod
       set_freadable(true)
+
       new Promise((resolve, reject) => {
         (function waitForFoo(){
             if (freadable) return resolve();
@@ -609,6 +611,9 @@ setInterval( () => {
         }
       })
     })
-  }
-}, 500)
+  } 
+}
+
+
+setInterval( reload_fready, 500 ) 
 
