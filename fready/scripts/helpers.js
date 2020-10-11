@@ -1,13 +1,23 @@
 const blacklisted_urls = [
-  'google', 'youtube', 'instagram', 'facebook', 'tiktok',
-  'duckduckgo', 'chrome:'
+  'google', 'youtube', 'instagram', 'facebook', 'tiktok', 'reddit', 'netflix', 'shopify', 'webflow',
+  'duckduckgo', 'chrome:', 'fready'
 ]
+const blacklisted_subs = [ "", null, 'home', 'contact', 'splash', "dashboard" ]
 
 function check_url(url){
-  let ary = url.replace("https://", "").replace("http://", "").split("/")[0].split("www.")
-  let host = ary[ary.length - 1]
+  let ary = url.replace("https://", "").replace("http://", "").split("/")
+  let host = ary[0].replace("www.", "")
+  let sub = (ary[1].split("?"))[0]
+  log(host)
+  log(sub)
   return !(blacklisted_urls.some(voo => { 
     if (host.includes(voo)){
+      log('BLACKLIST domain')
+      return true
+    }
+  })) && !(blacklisted_subs.some(voo => { 
+    if (sub == voo){
+      log('BLACKLIST subsdomain')
       return true
     }
   }))

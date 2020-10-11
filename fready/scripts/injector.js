@@ -15,7 +15,7 @@ function minify(html){
   return minifyy(html.toString(), { collapseWhitespace: true, removeComments: true, useShortDoctype: true, minifyJS: true, minifyCSS: true, removeAttributeQuotes: true })
 }
 function is_freadable(doc){
-  return calc_words() > MIN_WORDS_FOR_FREADABLE  && is_readable_(doc) 
+  return check_url(window.location.href) && calc_words() > MIN_WORDS_FOR_FREADABLE  && is_readable_(doc) 
 }
 function is_readable_(doc){
   return isProbablyReaderable(doc)
@@ -42,11 +42,12 @@ function parse_domain(){
 }
 
 function set_freadable(reload=false){
+  if (!reload) return freadable
   log(`${reload ? ">> parsing doc with readability" : ">> returning freadable"}`)
   if (freadable==null) return false
-  if (reload) freadable = new Readability(document.cloneNode(true)).parse()
-  freadable.domain = freadable.domain || parse_domain()
-  freadable.eta = freadable.domain || calc_eta(freadable)
+  freadable = new Readability(document.cloneNode(true)).parse()
+  freadable.domain = parse_domain()
+  freadable.eta = calc_eta(freadable)
   return freadable
 }
 function slurp_body(){
@@ -227,7 +228,7 @@ function locate_art(){
   let text_identifier = first_p.slice(0, Math.min(first_p.length, ART_LOCATOR_LEN))
   log(text_identifier)
   let art_locator = null
-  let search_these =   [ 'p', 'span', 'div', 'article', 'table', 'h1', 'h2', 'h3', 'h5', 'h6' ]
+  let search_these =   [ 'p', 'article', 'h1', 'h2', 'h3', 'h5', 'h6' ]
   search_these.some( el => {
     art_locator = $(`${el}:contains("${text_identifier}")`)
     log(`${el}:contains("${text_identifier}")`)
@@ -256,19 +257,21 @@ class Settings {
     let on = parent.dom.find(`#fd-set-${setting}-1`)
     let off = parent.dom.find(`#fd-set-${setting}-0`)
     let elements = {ident: ident, on: on, off: off}
-    on.click( ()=> { settings.set(setting, 1, elements )}) 
-    off.click( ()=> { settings.set(setting, 0, elements )}) 
+    on.click( ()=> { settings.set(setting, "on", elements )}) 
+    off.click( ()=> { settings.set(setting, "off", elements )}) 
     this.set(setting, def, elements)
   }
   send_bg(setting, val){
     let req = {}
     req[setting] = val
+    log(`sending to background`)
+    table(req)
     chrome.runtime.sendMessage({ set: req } , (response) => {log(response)})
   }
   set(setting, val, elements={}){
     log(`⚙️  Setting ${setting} to ${val}`)
     //sendMesage blah bl;ah
-    if (val==1){
+    if (val!="off"){
       elements.on.addClass('fd-util-select')
       elements.off.removeClass('fd-util-select')
       elements.ident && $(elements.ident).fadeIn()
@@ -335,7 +338,7 @@ class Popper {
   }
 
   wire_settings(){
-    settings.wire('alma', this, user.settings.alma!=0, 'fready-alma')
+    settings.wire('alma', this, user.settings.alma, 'fready-alma')
   }
   wire_popper(){
    if (!this.showing){
@@ -517,6 +520,14 @@ class Alma {
     </fready-alma>`)
   }
   pos_alma(){
+    if ($(this.art_start).offset() == null){
+      this.dom.css( {
+        'position':'fixed',
+        'top': `20px`,
+        'right': `50px`
+      })  
+      return
+    }
     let y = Math.max(30, ($(this.art_start).offset().top - 50))
     let x = Math.max(30, $(this.art_start).offset().left)
     this.dom.css( {
@@ -603,7 +614,7 @@ function reload_fready(){
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()
-          Mousetrap.bind('space', () => {if (user.settings.alma != 0) {toggle_read(null, { source: "space" }); return false}})
+          Mousetrap.bind('space', () => {if (user.settings.alma != "off") {toggle_read(null, { source: "space" }); return false}})
         }
       })
     })

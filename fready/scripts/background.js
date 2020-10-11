@@ -310,7 +310,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 
 chrome.browserAction.onClicked.addListener(tab => {
   log(`xfready icon was clicked on ${tab.id} (${tab.url}), syncing user`)
-  user.sync()
+  //user.sync()
 
   chrome.tabs.query({ active: true, currentWindow: true }, () => {
     chrome.tabs.sendMessage(tab.id, { trigger: "click" }, (response) => {
@@ -318,7 +318,7 @@ chrome.browserAction.onClicked.addListener(tab => {
         // Click on Fready icon
       } else {
         log(`INJECTING JS 💉 -{ ${tab.id} }-`)
-        inject_content(tab)
+        //inject_content(tab)
       }
     })
   })
