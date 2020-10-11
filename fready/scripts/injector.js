@@ -23,14 +23,13 @@ function is_readable_(doc){
 function calc_words(cfreadable=null){
   cfreadable = cfreadable || set_freadable()
   if (cfreadable == null) return 0
-  return Math.ceil(((cfreadable.length) / 5))
+  return Math.ceil(((cfreadable.length) / 4.7))
 }
 function calc_eta(cfreadable=null){
+  if (freadable && freadable.eta) return freadable.eta
   cfreadable = cfreadable || set_freadable()
-  let wpm_pref = user ? (user.prefs.wpm || 250) : 250
-  let eta = Math.floor(calc_words(cfreadable) / wpm_pref) 
-  freadable.eta = eta
-  return eta
+  let wpm_pref = (user && user.prefs) ? user.prefs.wpm : null
+  return calc_eta_from_chars(cfreadable.length, wpm_pref)
 }
 
 function calc_title(){
@@ -58,7 +57,7 @@ function slurp_body(){
 
 function sync_frd() {
   log(`> Syncing FRD - current frd - ${frd}`)
-  chrome.runtime.sendMessage({ frd: { eta: calc_words() } }, (response) => {})
+  chrome.runtime.sendMessage({ frd: { eta: calc_eta() } }, (response) => {})
 }
 
 function request(request_str, options={}){
@@ -74,7 +73,7 @@ function request(request_str, options={}){
 }
 
 function update_eta(){
-  chrome.runtime.sendMessage( { request: 'eta', eta: calc_words() })
+  chrome.runtime.sendMessage( { request: 'eta', eta: calc_eta() })
 }
 
 function sync_user(){
@@ -223,23 +222,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 function locate_art(){
 
+  if (!freadable){
+    log('freadable not ready cannot look for art')
+    return false
+  }
+
   log("> attempting to locate art") 
-  let first_p = $(slurp_body()).find('p').text()
-  let text_identifier = first_p.slice(0, Math.min(first_p.length, ART_LOCATOR_LEN))
+  let descendants = [ "div > div > p", "div > p", "p" ]
+  let sea = $(freadable.content)
+  let starting_element = sea.children().find("p")
+  for (el of sea.children().children()){
+    if ($(el).prop("tagName") == "P"){
+      starting_element = $(el)
+      break
+    }
+  }
+  let text_identifier = starting_element.text().substring(0, ART_LOCATOR_LEN).replaceAll(" ", "").replaceAll("\n", "")
+  log('>>>>>>')
   log(text_identifier)
   let art_locator = null
-  let search_these =   [ 'p', 'article', 'h1', 'h2', 'h3', 'h5', 'h6' ]
-  search_these.some( el => {
-    art_locator = $(`${el}:contains("${text_identifier}")`)
-    log(`${el}:contains("${text_identifier}")`)
-    if (art_locator != null && art_locator.text().length > 1 ){
-      art_locator = $(art_locator[art_locator.length-1])
-      return true
+  let els = [ "p", "div" ]
+  for (tags of els){
+    log(`lookign for ${tags}`)
+    tags = $(tags)
+    tags = document.querySelectorAll("p") 
+    for (var i = 0; i < tags.length; i++) {
+      let tag_text = tags[i].textContent.replaceAll(" ", "").replaceAll("\n", "")
+      if (tag_text.includes(text_identifier)) {
+        art_locator = $(tags[i])
+        log('found')
+        break
+      }
     }
-  })
-  art_locator = art_locator || $(document).find('p')
+    if (art_locator) return art_locator
+  }
+
   log(art_locator)
-  return art_locator
+  return art_locator 
 }
 
 function load_fready(){
@@ -610,7 +629,7 @@ function reload_fready(){
           log(art_locator)
           log(` Freadable details:`)
           table(freadable)
-          art_locator.addClass('fready-art-locator')
+          art_locator && art_locator.addClass('fready-art-locator')
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()

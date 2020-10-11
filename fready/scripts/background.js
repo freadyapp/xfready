@@ -202,10 +202,9 @@ class FreadyInstance extends FreadyConnectable{
     })
   }
 
-  update_eta(chars){
-    log(`updating eta badge for tab with url ${this.url}, with ${chars} characters.`)
-    let mins = (Math.round( chars / (user.prefs.wpm || DEF_PREF.wpm) ))
-    this.render_badge(Math.round(mins).toString() + "'")
+  update_eta(mins){
+    log(`updating eta badge for tab with url ${this.url}, with ${mins} mins.`)
+    this.render_badge(mins.toString() + "'")
     return mins
   }
 

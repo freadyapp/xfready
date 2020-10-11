@@ -95,3 +95,7 @@ function is_in_view(elem){
   return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
 
+function calc_eta_from_chars(chars=50, wpm=250){
+  return Math.ceil((chars / 4.7) / wpm)
+}
+
