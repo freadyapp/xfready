@@ -81,14 +81,6 @@ function sync_user(){
     log('>> syncing user')
     user = data.freadyslovelyuser
     table(user)
-    if (user.name) {
-      $("#loggedinlink").show()
-      $("#loggedoutlink").hide()
-      $("#username").text(user.name)
-    }else{
-      $("#loggedinlink").hide()
-      $("#loggedoutlink").show()
-    }
   })
 }
 
@@ -98,7 +90,6 @@ function load_frd(new_frd, cmd=null){
   log(`> Loading new FRD - command: ${cmd}`)
   table(new_frd)
   
-  // TODO fix this shit
   frd = new_frd
   $(frame).html(make_frame())
   screen = $('#freadysscreen')
