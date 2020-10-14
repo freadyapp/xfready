@@ -35,7 +35,7 @@ class User extends FreadyConnectable{
     this.sync()
   }
 
-  sync() {
+  sync(cb=(()=>{})) {
     log('syncing user')
     $.ajax({
       url: `${FREADY_API}/xapi/user.json`,
@@ -48,18 +48,21 @@ class User extends FreadyConnectable{
         this.prefs = JSON.parse(data['prefs'])
         this.settings = JSON.parse(data['settings'])
         this.api_key = data['key']
+        this.sync_tabs()
+        cb(true, data)
       },
       error: (e) => { 
         table('failed to sync user data', e)
+        this.sync_tabs()
+        cb(false, data)
       }
-    }).then( () => {
-      chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
-        table('syncing local user with live user', this)
-      })
-      this.sync_tabs()
     })
   }
   sync_tabs(){
+    chrome.storage.sync.set({ freadyslovelyuser: this }, (e) => {
+        table('syncing local user with live user', this)
+    })
+
     Object.entries(controller.freadies).forEach(([url, fready]) => {
       fready.tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab, { user: this }, (response) => {
@@ -68,6 +71,7 @@ class User extends FreadyConnectable{
       })
     })
   }
+
   set(req){
     this.ajax(
       'xapi/user', 
@@ -261,6 +265,15 @@ function inject_content(tab){
   })
 }
 
+function connect_xfready(reconnect=false){
+  user.sync((status, data) => {
+    if (!status || !data.key) {
+      chrome.tabs.create({
+        url: `${FREADY_API}/welcome${reconnect ? "-back!" : ''}`
+      })
+    }
+  })
+}
 
 /*
  *      Chrome Listeners
@@ -278,6 +291,12 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     frd.reload()
     sendResponse({ msg: "recieved frd" })
     return
+  }
+  if (request.request == "connect"){
+    log("opening new tab for the user to connect their account")
+    connect_xfready(true)
+    sendResponse({ msg: "connecting user"})
+    return 
   }
   if (request.request == "save"){
     controller.freadies[sender.tab.url].save({ content: request.content, meta: meta })
@@ -327,9 +346,7 @@ chrome.browserAction.onClicked.addListener(tab => {
 
 chrome.runtime.onInstalled.addListener(() => {
   log('!FREADY-HAS-BEEN-INSTALLED!')
-  chrome.tabs.create({
-    url: `${FREADY_API}/welcome`
-  })
+  connect_xfready()
 })
 
 

@@ -1,8 +1,8 @@
 const blacklisted_urls = [
   'google', 'youtube', 'instagram', 'facebook', 'tiktok', 'reddit', 'netflix', 'shopify', 'webflow',
-  'duckduckgo', 'chrome:', 'fready'
+  'duckduckgo', 'chrome:', 'fready', 'gmail'
 ]
-const blacklisted_subs = [ "", null, 'home', 'contact', 'splash', "dashboard" ]
+const blacklisted_subs = [ "", null, 'home', 'contact', 'splash', "dashboard", 'pricing' ]
 
 function check_url(url){
   let ary = url.replace("https://", "").replace("http://", "").split("/")
@@ -95,7 +95,7 @@ function is_in_view(elem){
   return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
 
-function calc_eta_from_chars(chars=50, wpm=250){
-  return Math.ceil((chars / 4.7) / wpm)
+function calc_eta_from_chars(chars=50, wpm=null){
+  return Math.ceil((chars / 4.7) / (wpm ? wpm : 250))
 }
 

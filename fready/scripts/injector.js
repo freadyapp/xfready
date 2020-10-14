@@ -52,6 +52,9 @@ function set_freadable(reload=false){
 function slurp_body(){
   return minify(set_freadable().content)
 }
+function alma_setting(){
+  return user.settings ? user.settings.alma : "on"
+}
 
 // ------------ talking with background ------------ //
 
@@ -76,11 +79,37 @@ function update_eta(){
   chrome.runtime.sendMessage( { request: 'eta', eta: calc_eta() })
 }
 
-function sync_user(){
+function sign_in_user(){
+  log(" >> checking if user is singed in ? << ")
+
+  if (user.api_key) return true
+
+  // user is not connected
+  // try to connect first
+
+  sync_user(null, (user) =>{
+    if (user.api_key == null){
+      log(" >> Not signed in :( ")
+      request('connect', {skip_slurp: true})
+    }
+  })
+
+  return false
+}
+
+function sync_user(nuser=null, cb=(()=>{})){
+  if (nuser) {
+    user = nuser  
+    table(user)
+    return
+  }
+
   chrome.storage.sync.get(['freadyslovelyuser'], (data) => {
     log('>> syncing user')
     user = data.freadyslovelyuser
     table(user)
+
+    cb(user)
   })
 }
 
@@ -151,8 +180,10 @@ function get_heart(inverse=false){
   return (inverse ? !saved : saved) ? filled_love : outlined_love 
 }
 
+
+
 function toggle_read(injecting_frd, options={}){
-  if (currently_injecting_lector || reading) return false;
+  if (currently_injecting_lector || reading || !sign_in_user()) return false;
 
   if (injecting_frd!=null){    
     log('> Injecting lector & starting to read.. Have fun reading!')     
@@ -179,6 +210,8 @@ function toggle_exit(){
 
 
 function saveunsave(){
+  if (!sign_in_user()) return false
+
   saved = !saved
   visual_pulse_save()
   if (saved){
@@ -199,6 +232,7 @@ function cleanup(){
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.trigger == "click") popper.toggle()
   if (request.user){
+    log(">> syncing user straight from the backend")
     sync_user(request.user)
   }
   if (request.frd){
@@ -348,7 +382,7 @@ class Popper {
   }
 
   wire_settings(){
-    settings.wire('alma', this, user.settings.alma, 'fready-alma')
+    settings.wire('alma', this, alma_setting, 'fready-alma')
   }
   wire_popper(){
    if (!this.showing){
@@ -624,7 +658,7 @@ function reload_fready(){
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()
-          Mousetrap.bind('space', () => {if (user.settings.alma != "off") {toggle_read(null, { source: "space" }); return false}})
+          Mousetrap.bind('space', () => {if (alma_setting != "off") {toggle_read(null, { source: "space" }); return false}})
         }
       })
     })
