@@ -382,7 +382,7 @@ class Popper {
   }
 
   wire_settings(){
-    settings.wire('alma', this, alma_setting, 'fready-alma')
+    settings.wire('alma', this, alma_setting(), 'fready-alma')
   }
   wire_popper(){
    if (!this.showing){
@@ -658,7 +658,7 @@ function reload_fready(){
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()
-          Mousetrap.bind('space', () => {if (alma_setting != "off") {toggle_read(null, { source: "space" }); return false}})
+          Mousetrap.bind('space', () => {if (alma_setting() != "off") {toggle_read(null, { source: "space" }); return false}})
         }
       })
     })
