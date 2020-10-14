@@ -131,6 +131,7 @@ class FreadyInstance extends FreadyConnectable{
     controller.remove_fready(this.url)
   }
   add_tab(tab) {
+    user.sync()
     if (!(this.tabs.includes(tab))){
       log(`adding new tab [${tab}] in ${this.url}`)
       this.tabs.push(tab)
