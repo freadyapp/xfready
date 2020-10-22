@@ -230,7 +230,9 @@ function cleanup(){
 // ------------ listeners ------------ //
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.trigger == "click") popper.toggle()
+  if (request.trigger == "click"){
+      popper.toggle()
+  }
   if (request.user){
     log(">> syncing user straight from the backend")
     sync_user(request.user)
@@ -556,7 +558,7 @@ class Alma {
         <a href='${FREADY_API}' target="_blank"><fready-icon>${fready_logo}</fready-icon></a>
       </fready-element>
       <fready-element class='fready-circle-btn' id='fready-alma-eta'>${calc_eta()}'</fready-element>
-      <fready-element id='fready-alma-space'>${space_to_read}</fready-element>
+      <fready-element class='fready-alma-btn' id='fready-alma-space'>${space_to_read}</fready-element>
       <fready-element id='fready-alma-menu'>
         <fready-icon class='fready-circle-btn' id='fready-alma-save'>${get_heart()}</fready-icon>
         <fready-icon class='fready-circle-btn' id='fready-alma-more'>${more}</fready-icon>
@@ -564,21 +566,21 @@ class Alma {
     </fready-alma>`)
   }
   pos_alma(){
-    if ($(this.art_start).offset() == null){
+    //if ($(this.art_start).offset() == null){
       this.dom.css( {
         'position':'fixed',
-        'top': `20px`,
+        'top': `10px`,
         'right': `50px`
       })  
       return
-    }
-    let y = Math.max(30, ($(this.art_start).offset().top - 50))
-    let x = Math.max(30, $(this.art_start).offset().left)
-    this.dom.css( {
-      'position':'absolute',
-      'top': `${y}px`,
-      'left': `${x}px`
-    })
+    //}
+    //let y = Math.max(30, ($(this.art_start).offset().top - 50))
+    //let x = Math.max(30, $(this.art_start).offset().left)
+    //this.dom.css( {
+      //'position':'absolute',
+      //'top': `${y}px`,
+      //'left': `${x}px`
+    //})
   }
   inject_alma(){
     //onDocumnetResize
@@ -658,7 +660,11 @@ function reload_fready(){
           settings = new Settings()
           alma = new Alma(art_locator)
           popper = new Popper()
-          Mousetrap.bind('space', () => {if (alma_setting() != "off") {toggle_read(null, { source: "space" }); return false}})
+          Mousetrap.bind('space', () => { if (alma_setting() != "off") {toggle_read(null, { source: "space" }); return false} })
+        }else{
+          load_fready()
+          settings = new Settings()
+          popper = new Popper()
         }
       })
     })
