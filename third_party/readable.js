@@ -2,7 +2,7 @@ var REGEXPS = {
   // NOTE: These two regular expressions are duplicated in
   // Readability.js. Please keep both copies in sync.
   unlikelyCandidates: /-ad-|ai2html|banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|footer|gdpr|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|ad-break|agegate|pagination|pager|popup|yom-remote/i,
-  okMaybeItsACandidate: /and|article|body|column|content|main|shadow/i,
+  okMaybeItsACandidate: /and|article|body|column|main|shadow/i,
 
   likelyDomains: /wikipedia|wiki|blog|medium|news/i,
   likelyPathContents: /topic|article|news|blog|read|doc|about|info|wiki/i,
@@ -27,11 +27,14 @@ function isNodeVisible(node) {
 function isProbablyReaderable(doc, options = {}) {
   // For backward compatibility reasons 'options' can either be a configuration object or the function used
   // to determine if a node is visible.
+  //
+  //
+  console.time("readable done in")
   if (typeof options == "function") {
     options = { visibilityChecker: options };
   }
 
-  var defaultOptions = { minScore: 26, minContentLength: 200, visibilityChecker: isNodeVisible };
+  var defaultOptions = { minScore: 30, minContentLength: 190, visibilityChecker: isNodeVisible };
   options = Object.assign(defaultOptions, options);
 
   var nodes = doc.querySelectorAll("p, pre");
@@ -75,21 +78,23 @@ function isProbablyReaderable(doc, options = {}) {
       return false;
     }
 
-    score += Math.sqrt(textContentLength - options.minContentLength) + addDomainCred(window.location)
-    console.log(`article's score: ${score}`)
+    score += Math.sqrt(textContentLength - options.minContentLength)*addDomainCred(window.location)
 
     if (score > options.minScore) {
+      console.log(`✅ article's score: ${score}, domain cred: ${addDomainCred(window.location)}\n\n - Fready's Readability Score \n (powered by @mozilla)`)
+      console.timeEnd("readable done in")
       return true;
     }
     return false;
   });
 }
 
+
 function addDomainCred(location){
   // domain match gives more cred than subdomain
   let cred = 4*REGEXPS.likelyDomains.test(location.host) + 2*REGEXPS.likelyPathContents.test(location.pathname)
-  console.log(`ADDING DOMAIN CRED FOR ${location}`, cred)
-  return cred
+  //console.log(`ADDING DOMAIN CRED FOR ${location}`, cred)
+  return cred+1
 }
 
 if (typeof module === "object") {
