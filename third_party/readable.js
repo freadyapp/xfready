@@ -3,8 +3,9 @@ var REGEXPS = {
   // Readability.js. Please keep both copies in sync.
   unlikelyCandidates: /-ad-|ai2html|banner|breadcrumbs|combx|comment|community|cover-wrap|disqus|extra|footer|gdpr|header|legends|menu|related|remark|replies|rss|shoutbox|sidebar|skyscraper|social|sponsor|supplemental|ad-break|agegate|pagination|pager|popup|yom-remote/i,
   okMaybeItsACandidate: /and|article|body|column|content|main|shadow/i,
-  likelyDomains: /and|wikipedia|wiki|blog|medium|news/i,
-  likelyPathContents: /and|topic|articles|news|blog|read|doc|about|info|/i,
+
+  likelyDomains: /wikipedia|wiki|blog|medium|news/i,
+  likelyPathContents: /topic|article|news|blog|read|doc|about|info|wiki/i,
 };
 
 function isNodeVisible(node) {
@@ -85,6 +86,7 @@ function isProbablyReaderable(doc, options = {}) {
 }
 
 function addDomainCred(location){
+  // domain match gives more cred than subdomain
   let cred = 4*REGEXPS.likelyDomains.test(location.host) + 2*REGEXPS.likelyPathContents.test(location.pathname)
   console.log(`ADDING DOMAIN CRED FOR ${location}`, cred)
   return cred
