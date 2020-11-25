@@ -1,6 +1,7 @@
 const blacklisted_urls = [
   'google', 'youtube', 'instagram', 'facebook', 'tiktok', 'reddit', 'netflix', 'shopify','webflow',
-  'duckduckgo', 'chrome:', 'fready', 'gmail', 'brightspace', 'canvas', 'canva', 'gmail', 'mailchimp'
+  'duckduckgo', 'chrome:', 'fready', 'gmail', 'brightspace', 'canvas', 'canva', 'gmail', 'mailchimp', 'amazon',
+  'pinterest', 'imgur', 'docs.google', 'stackoverflow', 'github', 'stackexchange'
 ]
 const blacklisted_subs = [ "", null, 'home', 'contact', 'splash', "dashboard", 'pricing' ]
 
