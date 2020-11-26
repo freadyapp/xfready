@@ -1,6 +1,6 @@
   {
     "name": "Fready",
-    "version": "0.1.2",
+    "version": "1.0.0",
     "description": "Spend less time reading articles.",
     "permissions": [
       "storage",
