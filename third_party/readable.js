@@ -58,7 +58,8 @@ function isProbablyReaderable(doc, options = {}) {
   var score = 0;
   // This is a little cheeky, we use the accumulator 'score' to decide what to return from
   // this callback:
-  return [].some.call(nodes, function (node) {
+  const domainCred = addDomainCred(window.location)
+  const result =  [].some.call(nodes, function (node) {
     if (!options.visibilityChecker(node)) {
       return false;
     }
@@ -78,23 +79,57 @@ function isProbablyReaderable(doc, options = {}) {
       return false;
     }
 
-    score += Math.sqrt(textContentLength - options.minContentLength)*addDomainCred(window.location)
+    score += Math.sqrt(textContentLength - options.minContentLength)*Math.sqrt(domainCred)
 
     if (score > options.minScore) {
-      console.log(`✅ article's score: ${score}, domain cred: ${addDomainCred(window.location)}\n\n - Fready's Readability Score \n (powered by @mozilla)`)
-      console.timeEnd("readable done in")
       return true;
     }
     return false;
   });
+
+  function floor(n) { return  Math.round((n + Number.EPSILON) * 100) / 100 }
+
+  console.timeEnd("readable done in")
+  // score range
+  
+  let base = Math.min(Math.max(score, 0), 30)*3
+  let accuracy = Math.min(Math.sqrt(Math.abs(score-30)), 10)
+  //let certainty = floor(base+accuracy) 
+
+  let certainty = Math.max(Math.min(100, score>0 ? Math.sqrt(score)*15 : 0), 0)
+ 
+  console.log(`🌴 - from Fready \n\n This page resembles %c${floor(certainty)}% %cof an article.`, "font-size:13px","font-size:11px" )
+  
+  if (result) console.log(`\n✅ This is an article, have a beautiful read!\n\n\tarticle's overall score: ${Math.min(floor(1.5*score), 100)}\n\tbonus: +${Math.min(floor(1.2*domainCred), 100)}`)
+
+
+  
+  return result
 }
 
 
 function addDomainCred(location){
   // domain match gives more cred than subdomain
-  let cred = 4*REGEXPS.likelyDomains.test(location.host) + 2*REGEXPS.likelyPathContents.test(location.pathname)
+  //console.log(location.pathname)
+  //if pw does not contain numbers, and at most 1 capital letter, add add dom cred + 1
+  //else - 0.1
+  let rd = (accu, pw) => {
+    //console.log(pw.search(/\w/), pw, pw.search(/\w/)==0)
+    if (pw.length>1 && pw.length < 13 && pw.search(/\w/)==0 && pw == pw.toLowerCase()){
+      //console.log("adding", pw, Math.sqrt(pw.length))
+      return accu + Math.sqrt(pw.length)
+    }else { 
+      //console.log("deducting", pw, Math.sqrt(pw.length)/2)
+      return accu - Math.sqrt(pw.length/2)
+    } 
+  }
+
+  let urlFormation = location.pathname.concat(location.search).split('-').reduce(rd, 0)/6
+  let cred = 4*REGEXPS.likelyDomains.test(location.host) + 2*REGEXPS.likelyPathContents.test(location.pathname) + urlFormation
+  //console.log(cred)
+  //console.log(urlFormation)
   //console.log(`ADDING DOMAIN CRED FOR ${location}`, cred)
-  return cred+1
+  return cred
 }
 
 if (typeof module === "object") {
